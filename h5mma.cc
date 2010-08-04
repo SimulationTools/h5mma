@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstring>
 #include <iostream>
+#include <assert.h>
 #include "H5Cpp.h"
 #include "mathlink.h" 
 #include "time.h"
