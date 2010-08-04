@@ -21,6 +21,10 @@ h5mma : h5mmatm.o h5mma.o
 h5mmatm.cc : h5mma.tm
 	${MPREP} $? -o $@
 
+.PHONY : clean
+clean :
+	-rm -f h5mma h5mmatm.o h5mma.o h5mmatm.cc
+
 # mcc = /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions/mcc
 
 # #addtwo.tm.c:	addtwo.tm
