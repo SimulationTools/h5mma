@@ -1,3 +1,6 @@
+:Evaluate: BeginPackage["h5mma`"]
+:Evaluate: Begin["`Private`"]
+
 :Begin: 
 :Function:       ReadDatasets
 :Pattern:        ReadDatasets[fileName_String]
@@ -21,3 +24,6 @@
 :ArgumentTypes:  { String, String } 
 :ReturnType:     Manual
 :End: 
+
+:Evaluate: End[]
+:Evaluate: EndPackage[]
