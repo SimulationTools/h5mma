@@ -55,7 +55,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}, opts:OptionsPattern[]] :=
       {"Datasets", _List},
       ReadDataset[file, #]& /@ elements[[2]],
 
-      {"Data"},
+      "Data"|{"Data"},
       datasets = ReadDatasets[file];
       ReadDataset[file, #]& /@ datasets,
 
