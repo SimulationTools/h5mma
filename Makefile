@@ -6,32 +6,32 @@ CADDSDIR = ${MLINKDIR}/CompilerAdditions
 INCDIR = ${CADDSDIR}
 LIBDIR = ${CADDSDIR}
 
-H5DIR = /Users/ian/Software/hdf5-1.8.1
+H5DIR = /usr/local/hdf5-1.8.5
 
 MPREP = ${CADDSDIR}/mprep
+MCC = ${CADDSDIR}/mcc
+
+PKGFILES = MacOSX-x86-64 h5mma.m h5mma.nb phi.0.xy.h5 Kernel
 
 all : h5mma
 
-h5mma : h5mmatm.o h5mma.o
-	${CXX} -I${INCDIR} -I$(H5DIR)/include h5mmatm.o h5mma.o -L${LIBDIR} -L$(H5DIR)/lib -lMLi3 -lhdf5_cpp -lhdf5 -o $@
+h5mma : h5mmatm.cc h5mma.cc
+	${MCC} -n -I$(H5DIR)/include h5mma.cc h5mmatm.cc -L$(H5DIR)/lib -lhdf5_cpp -lhdf5 -xo h5mma
+	cp -R h5mma/* ./
+	rm -r h5mma
 
-.cc.o :
-	${CXX} -c -I${INCDIR} -I$(H5DIR)/include $<
+h5mma.zip : 
+	zip -r h5mma.zip ${PKGFILES}
+	
+h5mma.tar.gz : 
+	tar czvf h5mma.tar.gz ${PKGFILES}
+	
+h5mma.tar.bz2 : 
+	tar cjvf h5mma.tar.bz2 ${PKGFILES}
 
 h5mmatm.cc : h5mma.tm
 	${MPREP} $? -o $@
 
 .PHONY : clean
 clean :
-	-rm -f h5mma h5mmatm.o h5mma.o h5mmatm.cc
-
-# mcc = /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions/mcc
-
-# #addtwo.tm.c:	addtwo.tm
-# #	$(mprep) addtwo.tm  -o addtwo.tm.c
-
-# addtwo:	addtwo.c
-# 	$(mcc) addtwo.tm addtwo.c -o addtwo
-
-# h5mma:	h5mma.cc
-# 	$(mcc) h5mma.tm h5mma.cc -o h5mma -I/Users/ian/Software/hdf5-1.8.1/include -L/Users/ian/Software/hdf5-1.8.1/lib -lhdf5_cpp -lhdf5
+	-rm -rf h5mmatm.cc MacOSX-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2
