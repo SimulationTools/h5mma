@@ -52,9 +52,6 @@ ImportHDF5[file_String, elements_:{"Datasets"}, opts:OptionsPattern[]] :=
       {"Datasets", _String},
       ReadDataset[file, elements[[2]]],
 
-      {"Datasets", _List},
-      ReadDataset[file, #]& /@ elements[[2]],
-
       "Data"|{"Data"},
       datasets = ReadDatasets[file];
       ReadDataset[file, #]& /@ datasets,
@@ -72,6 +69,13 @@ ImportHDF5[file_String, elements_:{"Datasets"}, opts:OptionsPattern[]] :=
       "Annotations"|{"Annotations"},
       datasets = ReadDatasets[file];
       ReadDatasetAttributes[file, #]& /@ datasets,
+
+      {_String, _Integer},
+      datasets = ReadDatasets[file];
+      ImportHDF5[file, {elements[[1]], datasets[[elements[[2]]]]}],
+
+      {_String, _List},
+      ImportHDF5[file, {elements[[1]], #}]& /@ elements[[2]],
 
       "Rules"|{"Rules"},
       datasets = ReadDatasets[file];
