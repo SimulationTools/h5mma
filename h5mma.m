@@ -39,7 +39,7 @@ $h5mmaLink = Install["h5mma"];
 
 Options[ImportHDF5] = { h5mmaMathLink -> If[$h5mmaLink=!=$Failed, True, False] };
 ImportHDF5[file_String, elements_:{"Datasets"}, opts:OptionsPattern[]] := 
-  Module[{useml, datasets},
+  Module[{useml, datasets, annotations, data, dims},
     useml = OptionValue[h5mmaMathLink];
     
     (* If the MathLink file is not found, then just use Mathematica's built-in HDF5 support *)
@@ -59,12 +59,26 @@ ImportHDF5[file_String, elements_:{"Datasets"}, opts:OptionsPattern[]] :=
       datasets = ReadDatasets[file];
       ReadDataset[file, #]& /@ datasets,
 
+      {"Dimensions", _String},
+      ReadDatasetDimensions[file, elements[[2]]],
+
+      "Dimensions"|{"Dimensions"},
+      datasets = ReadDatasets[file];
+      ReadDatasetDimensions[file, #]& /@ datasets,
+
       {"Annotations", _String},
       ReadDatasetAttributes[file, elements[[2]]],
 
       "Annotations"|{"Annotations"},
       datasets = ReadDatasets[file];
       ReadDatasetAttributes[file, #]& /@ datasets,
+
+      "Rules"|{"Rules"},
+      datasets = ReadDatasets[file];
+      annotations = ImportHDF5[file, "Annotations"];
+      data = ImportHDF5[file, "Data"];
+      dims = ImportHDF5[file, "Dimensions"];
+      {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims},
 
       _,
       ReadDatasets[file]

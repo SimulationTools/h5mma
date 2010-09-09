@@ -64,6 +64,51 @@ void nestedList(int *allData, hsize_t dims[], int rank)
   }
 }
 
+void ReadDatasetDimensions(const char *fileName, const char *datasetName)
+{
+  try
+   {
+     H5File  file(fileName, H5F_ACC_RDONLY);
+     DataSet dataset = file.openDataSet(datasetName);
+     DataSpace dataspace = dataset.getSpace();
+     const int rank = dataspace.getSimpleExtentNdims();
+     hsize_t dims_out[rank];
+     int ndims = dataspace.getSimpleExtentDims(dims_out, NULL);
+
+     int dims[rank];
+     for (int i = 0; i < rank; i++)
+     {
+       dims[i] = dims_out[i];
+     }
+
+     MLPutIntegerList(stdlink, dims, rank);
+   }
+
+   // catch failure caused by the H5File operations
+   catch( FileIException error )
+   {
+      error.printError();
+      fail();
+      return;
+   }
+
+   // catch failure caused by the DataSet operations
+   catch( DataSetIException error )
+   {
+      fail();
+      error.printError();
+      return;
+   }
+
+   // catch failure caused by the DataSpace operations
+   catch( DataSpaceIException error )
+   {
+      fail();
+      error.printError();
+      return;
+   }
+}
+
 void ReadDataset(const char *fileName, const char *datasetName)
 {
   try

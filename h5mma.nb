@@ -10,14 +10,27 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     11877,        362]
-NotebookOptionsPosition[     10207,        301]
-NotebookOutlinePosition[     10719,        323]
-CellTagsIndexPosition[     10634,        318]
+NotebookDataLength[     15997,        483]
+NotebookOptionsPosition[     13836,        406]
+NotebookOutlinePosition[     14348,        428]
+CellTagsIndexPosition[     14263,        423]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{"SetDirectory", "[", "\"\</Users/barry/Research/Code\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.4929516574062233`*^9, 3.492951675677423*^9}, 
+   3.492951759677071*^9}],
+
+Cell[BoxData["\<\"/Users/barry/Research/Code\"\>"], "Output",
+ CellChangeTimes->{{3.492951668503448*^9, 3.4929516762647142`*^9}, 
+   3.492951760373918*^9, 3.493012490614328*^9, 3.493012539531595*^9}]
+}, Open  ]],
+
 Cell[BoxData[
  RowBox[{"<<", "h5mma`"}]], "Input",
  CellChangeTimes->{{3.490511229646881*^9, 3.490511234727852*^9}}],
@@ -44,7 +57,8 @@ Cell[BoxData[
    3.4905262750937023`*^9, 3.4905262940064163`*^9}, 3.4905268018741407`*^9, 
    3.490527637881537*^9, 3.4905277072060223`*^9, 3.490528267544304*^9, 
    3.490529531437243*^9, 3.4905296960374517`*^9, 3.490529766473404*^9, {
-   3.4905298115098877`*^9, 3.490529827103351*^9}}]
+   3.4905298115098877`*^9, 3.490529827103351*^9}, 3.492951765397154*^9, 
+   3.493012350969564*^9, 3.493012492856119*^9, 3.493012541987927*^9}]
 }, Open  ]],
 
 Cell["Available functions", "Text",
@@ -72,12 +86,12 @@ Cell[BoxData[
         {
          ButtonBox["h5mmaMathLink",
           BaseStyle->"InformationLinkLF",
-          ButtonData:>{"Info3490537027-3803652", {"h5mmaMathLink", "h5mma`"}},
+          ButtonData:>{"Info3493019743-4305778", {"h5mmaMathLink", "h5mma`"}},
           
           ButtonNote->"h5mma`"], 
          ButtonBox["ImportHDF5",
           BaseStyle->"InformationLinkLF",
-          ButtonData:>{"Info3490537027-3803652", {"ImportHDF5", "h5mma`"}},
+          ButtonData:>{"Info3493019743-4305778", {"ImportHDF5", "h5mma`"}},
           ButtonNote->"h5mma`"]}
        },
        DefaultBaseStyle->"InfoGrid",
@@ -87,7 +101,7 @@ Cell[BoxData[
     GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}}]}, 
    Dynamic[Typeset`open$$],
    ImageSize->Automatic]]], "Print", "InfoCell",
- CellChangeTimes->{3.490529827472302*^9}]
+ CellChangeTimes->{3.493012543573615*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -103,8 +117,8 @@ returning a complete \
 of it.\\nImportHDF5[\\\"file\\\", \!\(\*\\nStyleBox[\\\"elements\\\", \
 \\\"TI\\\"]\)] imports the specified elements from a file.\"\>", 
   "MSG"]], "Print", "PrintUsage",
- CellChangeTimes->{3.490530063763619*^9},
- CellTags->"Info3490537263-9877298"]
+ CellChangeTimes->{3.493012544232327*^9},
+ CellTags->"Info3493019744-7700420"]
 }, Open  ]],
 
 Cell["Example", "Text",
@@ -138,12 +152,12 @@ Cell[BoxData[
 Cell[BoxData[
  TagBox[
   RowBox[{"{", 
-   RowBox[{"\<\"/CTGBASE::phi it=0 tl=0 m=0 rl=0 c=0\"\>", 
-    ",", "\<\"/CTGBASE::phi it=0 tl=0 m=0 rl=0 c=1\"\>", ",", 
-    RowBox[{"\[LeftSkeleton]", "136", "\[RightSkeleton]"}], 
+   RowBox[{"\<\"/CTGBASE::phi it=0 tl=0 m=0 rl=0 c=0\"\>", ",", 
+    RowBox[{"\[LeftSkeleton]", "137", "\[RightSkeleton]"}], 
     ",", "\<\"/CTGBASE::phi it=0 tl=0 m=0 rl=5 c=8\"\>"}], "}"}],
   Short]], "Output",
- CellChangeTimes->{3.490530135666057*^9}]
+ CellChangeTimes->{3.490530135666057*^9, 3.492951771474258*^9, 
+  3.493012361547171*^9}]
 }, Open  ]],
 
 Cell["We can also specify which datasets to import:", "Text",
@@ -182,12 +196,9 @@ Cell[BoxData[
     RowBox[{"{", 
      RowBox[{
       RowBox[{"{", 
-       RowBox[{
-       "0.9853526022944306`", ",", "0.9852043715410528`", ",", 
-        "0.9850547483918555`", ",", 
-        RowBox[{"\[LeftSkeleton]", "93", "\[RightSkeleton]"}], ",", 
-        "0.9850547197481124`", ",", "0.9852043436365806`", ",", 
-        "0.985352575104176`"}], "}"}], ",", 
+       RowBox[{"0.9853526022944306`", ",", "0.9852043715410528`", ",", 
+        RowBox[{"\[LeftSkeleton]", "95", "\[RightSkeleton]"}], ",", 
+        "0.9852043436365806`", ",", "0.985352575104176`"}], "}"}], ",", 
       RowBox[{"\[LeftSkeleton]", "69", "\[RightSkeleton]"}], ",", 
       RowBox[{"{", 
        RowBox[{
@@ -197,7 +208,8 @@ Cell[BoxData[
      "}"}], ",", 
     RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}]}], "}"}],
   Short]], "Output",
- CellChangeTimes->{3.490530164288288*^9}]
+ CellChangeTimes->{3.490530164288288*^9, 3.492951950267725*^9, 
+  3.49301236484373*^9}]
 }, Open  ]],
 
 Cell["Or just import them all:", "Text",
@@ -230,12 +242,9 @@ Cell[BoxData[
     RowBox[{"{", 
      RowBox[{
       RowBox[{"{", 
-       RowBox[{
-       "0.9853526022944306`", ",", "0.9852043715410528`", ",", 
-        "0.9850547483918555`", ",", 
-        RowBox[{"\[LeftSkeleton]", "93", "\[RightSkeleton]"}], ",", 
-        "0.9850547197481124`", ",", "0.9852043436365806`", ",", 
-        "0.985352575104176`"}], "}"}], ",", 
+       RowBox[{"0.9853526022944306`", ",", "0.9852043715410528`", ",", 
+        RowBox[{"\[LeftSkeleton]", "95", "\[RightSkeleton]"}], ",", 
+        "0.9852043436365806`", ",", "0.985352575104176`"}], "}"}], ",", 
       RowBox[{"\[LeftSkeleton]", "70", "\[RightSkeleton]"}]}], "}"}], ",", 
     RowBox[{"\[LeftSkeleton]", "137", "\[RightSkeleton]"}], ",", 
     RowBox[{"{", 
@@ -245,7 +254,8 @@ Cell[BoxData[
       RowBox[{"\[LeftSkeleton]", "30", "\[RightSkeleton]"}]}], "}"}]}], "}"}],
   
   Short]], "Output",
- CellChangeTimes->{3.490530176681718*^9}]
+ CellChangeTimes->{3.490530176681718*^9, 3.492951952887806*^9, 
+  3.493012372205903*^9}]
 }, Open  ]],
 
 Cell[TextData[{
@@ -275,32 +285,127 @@ Cell[BoxData[
  TagBox[
   RowBox[{"{", 
    RowBox[{
+    RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}], ",", 
     RowBox[{"{", 
      RowBox[{
       RowBox[{"\<\"time\"\>", "\[Rule]", "0.`"}], ",", 
       RowBox[{"\<\"timestep\"\>", "\[Rule]", "0"}], ",", 
-      RowBox[{"\<\"name\"\>", "\[Rule]", "\<\"CTGBASE::phi\"\>"}], ",", 
-      RowBox[{"\<\"level\"\>", "\[Rule]", "0"}], ",", 
-      RowBox[{"\<\"origin\"\>", "\[Rule]", 
-       RowBox[{"{", 
-        RowBox[{
-         RowBox[{"-", "47.04`"}], ",", 
-         RowBox[{"-", "47.04`"}]}], "}"}]}], ",", 
-      RowBox[{"\<\"delta\"\>", "\[Rule]", 
-       RowBox[{"{", 
-        RowBox[{"0.96`", ",", "0.9600000000000001`"}], "}"}]}], ",", 
+      RowBox[{"\[LeftSkeleton]", "4", "\[RightSkeleton]"}], ",", 
       RowBox[{"\<\"iorigin\"\>", "\[Rule]", 
        RowBox[{"{", 
         RowBox[{"0", ",", "0"}], "}"}]}]}], "}"}], ",", 
-    RowBox[{"\[LeftSkeleton]", "137", "\[RightSkeleton]"}], ",", 
+    RowBox[{"\[LeftSkeleton]", "136", "\[RightSkeleton]"}], ",", 
     RowBox[{"{", 
-     RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}], "}"}]}], "}"}],
+     RowBox[{
+      RowBox[{"\<\"time\"\>", "\[Rule]", "0.`"}], ",", 
+      RowBox[{"\<\"timestep\"\>", "\[Rule]", "0"}], ",", 
+      RowBox[{"\[LeftSkeleton]", "4", "\[RightSkeleton]"}], ",", 
+      RowBox[{"\<\"iorigin\"\>", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"13024", ",", "12624"}], "}"}]}]}], "}"}]}], "}"}],
   Short]], "Output",
- CellChangeTimes->{3.4905302067606497`*^9}]
+ CellChangeTimes->{3.4905302067606497`*^9, 3.492951954404117*^9, 
+  3.493012375197516*^9}]
+}, Open  ]],
+
+Cell["And we can get the dimensions of a dataset's data", "Text",
+ CellChangeTimes->{{3.4930123861571074`*^9, 3.493012394988605*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"allDims", "=", 
+   RowBox[{"ImportHDF5", "[", 
+    RowBox[{"file", ",", "\"\<Dimensions\>\""}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.493012398379175*^9, 3.4930124092291613`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Short", "[", "allDims", "]"}]], "Input",
+ CellChangeTimes->{{3.493012410483585*^9, 3.493012412926076*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"71", ",", "99"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"71", ",", "99"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"38", ",", "99"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"35", ",", "37"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"36", ",", "37"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"29", ",", "37"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"35", ",", "37"}], "}"}], ",", 
+    RowBox[{"\[LeftSkeleton]", "126", "\[RightSkeleton]"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"32", ",", "34"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"38", ",", "33"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"38", ",", "33"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"32", ",", "33"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"31", ",", "33"}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"31", ",", "34"}], "}"}]}], "}"}],
+  Short]], "Output",
+ CellChangeTimes->{3.493012413852128*^9, 3.49301249964773*^9, 
+  3.493012552553774*^9}]
+}, Open  ]],
+
+Cell["Finally, we can get the whole lot in one go", "Text",
+ CellChangeTimes->{{3.493013609386043*^9, 3.493013616329533*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"rules", "=", 
+   RowBox[{"ImportHDF5", "[", 
+    RowBox[{"file", ",", "\"\<Rules\>\""}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.493012561799562*^9, 3.493012568984702*^9}, {
+  3.4930126029779367`*^9, 3.4930126034245863`*^9}, {3.493012667272015*^9, 
+  3.4930126683506613`*^9}, {3.4930127503912582`*^9, 3.493012755106142*^9}, {
+  3.493013536263772*^9, 3.493013544300663*^9}, {3.493013619762686*^9, 
+  3.493013629754871*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Short", "[", "rules", "]"}]], "Input",
+ CellChangeTimes->{{3.493013631262555*^9, 3.493013633153777*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"\<\"Annotations\"\>", "\[Rule]", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"\<\"time\"\>", "\[Rule]", "0.`"}], ",", 
+         RowBox[{"\<\"timestep\"\>", "\[Rule]", "0"}], ",", 
+         RowBox[{"\[LeftSkeleton]", "4", "\[RightSkeleton]"}], ",", 
+         RowBox[{"\<\"iorigin\"\>", "\[Rule]", 
+          RowBox[{"{", 
+           RowBox[{"0", ",", "0"}], "}"}]}]}], "}"}], ",", 
+       RowBox[{"\[LeftSkeleton]", "138", "\[RightSkeleton]"}]}], "}"}]}], ",", 
+    RowBox[{"\[LeftSkeleton]", "2", "\[RightSkeleton]"}], ",", 
+    RowBox[{
+     RowBox[{"\<\"\"\>", "\[Ellipsis]", "\<\"\"\>"}], "\[Rule]", 
+     RowBox[{"\[LeftSkeleton]", "1", "\[RightSkeleton]"}]}]}], "}"}],
+  Short]], "Output",
+ CellChangeTimes->{3.493013634317968*^9}]
 }, Open  ]]
 },
-WindowSize->{1241, 756},
-WindowMargins->{{-6, Automatic}, {Automatic, 0}},
+WindowSize->{640, 540},
+WindowMargins->{{12, Automatic}, {Automatic, 0}},
 ShowSelection->True,
 FrontEndVersion->"7.0 for Mac OS X x86 (32-bit) (November 10, 2008)",
 StyleDefinitions->"Default.nb"
@@ -310,59 +415,75 @@ StyleDefinitions->"Default.nb"
 (* Internal cache information *)
 (*CellTagsOutline
 CellTagsIndex->{
- "Info3490537263-9877298"->{
-  Cell[2981, 98, 441, 8, 60, "Print",
-   CellTags->"Info3490537263-9877298"]}
+ "Info3493019744-7700420"->{
+  Cell[3507, 112, 441, 8, 78, "Print",
+   CellTags->"Info3493019744-7700420"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"Info3490537263-9877298", 10532, 312}
+ {"Info3493019744-7700420", 14160, 417}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[545, 20, 116, 2, 27, "Input"],
-Cell[664, 24, 190, 6, 26, "Text"],
 Cell[CellGroupData[{
-Cell[879, 34, 136, 2, 27, "Input"],
-Cell[1018, 38, 458, 8, 27, "Output"]
+Cell[567, 22, 195, 4, 27, "Input"],
+Cell[765, 28, 199, 2, 27, "Output"]
 }, Open  ]],
-Cell[1491, 49, 101, 1, 26, "Text"],
+Cell[979, 33, 116, 2, 27, "Input"],
+Cell[1098, 37, 190, 6, 26, "Text"],
 Cell[CellGroupData[{
-Cell[1617, 54, 117, 2, 27, "Input"],
-Cell[1737, 58, 1085, 31, 54, "Print"]
+Cell[1313, 47, 136, 2, 27, "Input"],
+Cell[1452, 51, 550, 9, 27, "Output"]
+}, Open  ]],
+Cell[2017, 63, 101, 1, 26, "Text"],
+Cell[CellGroupData[{
+Cell[2143, 68, 117, 2, 27, "Input"],
+Cell[2263, 72, 1085, 31, 54, "Print"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2859, 94, 119, 2, 27, "Input"],
-Cell[2981, 98, 441, 8, 60, "Print",
- CellTags->"Info3490537263-9877298"]
+Cell[3385, 108, 119, 2, 27, "Input"],
+Cell[3507, 112, 441, 8, 78, "Print",
+ CellTags->"Info3493019744-7700420"]
 }, Open  ]],
-Cell[3437, 109, 89, 1, 26, "Text"],
-Cell[3529, 112, 213, 4, 27, "Input"],
-Cell[3745, 118, 151, 3, 26, "Text"],
-Cell[3899, 123, 308, 6, 27, "Input"],
+Cell[3963, 123, 89, 1, 26, "Text"],
+Cell[4055, 126, 213, 4, 27, "Input"],
+Cell[4271, 132, 151, 3, 26, "Text"],
+Cell[4425, 137, 308, 6, 27, "Input"],
 Cell[CellGroupData[{
-Cell[4232, 133, 131, 2, 27, "Input"],
-Cell[4366, 137, 351, 8, 27, "Output"]
+Cell[4758, 147, 131, 2, 27, "Input"],
+Cell[4892, 151, 340, 8, 43, "Output"]
 }, Open  ]],
-Cell[4732, 148, 127, 1, 26, "Text"],
-Cell[4862, 151, 836, 18, 27, "Input"],
+Cell[5247, 162, 127, 1, 26, "Text"],
+Cell[5377, 165, 836, 18, 58, "Input"],
 Cell[CellGroupData[{
-Cell[5723, 173, 133, 2, 27, "Input"],
-Cell[5859, 177, 862, 22, 27, "Output"]
+Cell[6238, 187, 133, 2, 27, "Input"],
+Cell[6374, 191, 826, 20, 43, "Output"]
 }, Open  ]],
-Cell[6736, 202, 106, 1, 26, "Text"],
-Cell[6845, 205, 681, 12, 27, "Input"],
+Cell[7215, 214, 106, 1, 26, "Text"],
+Cell[7324, 217, 681, 12, 27, "Input"],
 Cell[CellGroupData[{
-Cell[7551, 221, 130, 2, 27, "Input"],
-Cell[7684, 225, 811, 22, 27, "Output"]
+Cell[8030, 233, 130, 2, 27, "Input"],
+Cell[8163, 237, 776, 20, 43, "Output"]
 }, Open  ]],
-Cell[8510, 250, 213, 6, 26, "Text"],
-Cell[8726, 258, 326, 7, 27, "Input"],
+Cell[8954, 260, 213, 6, 26, "Text"],
+Cell[9170, 268, 326, 7, 27, "Input"],
 Cell[CellGroupData[{
-Cell[9077, 269, 133, 2, 27, "Input"],
-Cell[9213, 273, 978, 25, 27, "Output"]
+Cell[9521, 279, 133, 2, 27, "Input"],
+Cell[9657, 283, 973, 24, 43, "Output"]
+}, Open  ]],
+Cell[10645, 310, 133, 1, 26, "Text"],
+Cell[10781, 313, 224, 5, 27, "Input"],
+Cell[CellGroupData[{
+Cell[11030, 322, 130, 2, 27, "Input"],
+Cell[11163, 326, 1047, 33, 43, "Output"]
+}, Open  ]],
+Cell[12225, 362, 125, 1, 26, "Text"],
+Cell[12353, 365, 465, 9, 27, "Input"],
+Cell[CellGroupData[{
+Cell[12843, 378, 128, 2, 27, "Input"],
+Cell[12974, 382, 846, 21, 43, "Output"]
 }, Open  ]]
 }
 ]

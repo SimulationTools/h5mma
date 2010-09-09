@@ -17,6 +17,14 @@
 :ReturnType:     Manual
 :End: 
 
+:Begin:
+:Function:       ReadDatasetDimensions
+:Pattern:        ReadDatasetDimensions[fileName_String, datasetName_String]
+:Arguments:      { fileName, datasetName }
+:ArgumentTypes:  { String, String }
+:ReturnType:     Manual
+:End:
+
 :Begin: 
 :Function:       ReadDatasetAttributes
 :Pattern:        ReadDatasetAttributes[fileName_String, datasetName_String]
