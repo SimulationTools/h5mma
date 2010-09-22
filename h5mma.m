@@ -31,20 +31,12 @@ StyleBox[\"Mathematica\",\nFontSlant->\"Italic\"]\) version of it.
 ImportHDF5[\"file\", \!\(\*
 StyleBox[\"elements\", \"TI\"]\)] imports the specified elements from a file.";
 
-h5mmaMathLink::usage = "h5mmaMathLink specifies whether ImportHDF5 should use a MathLink executable when importing.";
-
 Begin["`Private`"];
 
-$h5mmaLink = Install["h5mma"];
+Install["h5mma"];
 
-Options[ImportHDF5] = { h5mmaMathLink -> If[$h5mmaLink=!=$Failed, True, False] };
-ImportHDF5[file_String, elements_:{"Datasets"}, opts:OptionsPattern[]] := 
+ImportHDF5[file_String, elements_:{"Datasets"}] := 
   Module[{useml, datasets, annotations, data, dims},
-    useml = OptionValue[h5mmaMathLink];
-    
-    (* If the MathLink file is not found, then just use Mathematica's built-in HDF5 support *)
-    If[!useml, Return[Import[file, elements, Evaluate[FilterRules[{opts}, Options[Import]]]]]];
-
     Switch[elements,
       "Datasets"|{"Datasets"},
       ReadDatasets[file],
@@ -87,7 +79,6 @@ ImportHDF5[file_String, elements_:{"Datasets"}, opts:OptionsPattern[]] :=
       _,
       ReadDatasets[file]
     ]
-
 ];
 
 End[];
