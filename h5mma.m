@@ -45,6 +45,8 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
       Return[$Failed]
     ];
 
+    dsIndex = 0.0;
+
     Switch[elements,
       "Datasets"|{"Datasets"},
       Monitor[ReadDatasets[absfile],
