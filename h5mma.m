@@ -30,6 +30,7 @@ ImportHDF5::usage = "ImportHDF5[\"file\"] imports data from an HDF5 file, return
 StyleBox[\"Mathematica\",\nFontSlant->\"Italic\"]\) version of it.
 ImportHDF5[\"file\", \!\(\*
 StyleBox[\"elements\", \"TI\"]\)] imports the specified elements from a file.";
+ImportHDF5::nffil = "File not found during import.";
 
 Begin["`Private`"];
 
@@ -37,48 +38,54 @@ Install["h5mma"];
 dsIndex = 0.0;
 
 ImportHDF5[file_String, elements_:{"Datasets"}] := 
-  Module[{useml, datasets, annotations, data, dims},
+  Module[{absfile, datasets, annotations, data, dims},
+    If[FileExistsQ[file],
+      absfile = AbsoluteFileName[file],
+      Message[ImportHDF5::nffil];
+      Return[$Failed]
+    ];
+
     Switch[elements,
       "Datasets"|{"Datasets"},
-      ReadDatasets[file],
+      ReadDatasets[absfile],
 
       {"Datasets", _String},
-      ReadDataset[file, elements[[2]]],
+      ReadDataset[absfile, elements[[2]]],
 
       "Data"|{"Data"},
-      datasets = ReadDatasets[file];
-      ReadDataset[file, #]& /@ datasets,
+      datasets = ReadDatasets[absfile];
+      ReadDataset[absfile, #]& /@ datasets,
 
       {"Dimensions", _String},
-      ReadDatasetDimensions[file, elements[[2]]],
+      ReadDatasetDimensions[absfile, elements[[2]]],
 
       "Dimensions"|{"Dimensions"},
-      datasets = ReadDatasets[file];
-      ReadDatasetDimensions[file, #]& /@ datasets,
+      datasets = ReadDatasets[absfile];
+      ReadDatasetDimensions[absfile, #]& /@ datasets,
 
       {"Annotations", _String},
-      ReadDatasetAttributes[file, elements[[2]]],
+      ReadDatasetAttributes[absfile, elements[[2]]],
 
       "Annotations"|{"Annotations"},
-      datasets = ReadDatasets[file];
-      ReadDatasetAttributes[file, #]& /@ datasets,
+      datasets = ReadDatasets[absfile];
+      ReadDatasetAttributes[absfile, #]& /@ datasets,
 
       {_String, _Integer},
-      datasets = ReadDatasets[file];
-      ImportHDF5[file, {elements[[1]], datasets[[elements[[2]]]]}],
+      datasets = ReadDatasets[absfile];
+      ImportHDF5[absfile, {elements[[1]], datasets[[elements[[2]]]]}],
 
       {_String, _List},
-      ImportHDF5[file, {elements[[1]], #}]& /@ elements[[2]],
+      ImportHDF5[absfile, {elements[[1]], #}]& /@ elements[[2]],
 
       "Rules"|{"Rules"},
-      datasets = ReadDatasets[file];
-      annotations = ImportHDF5[file, "Annotations"];
-      data = ImportHDF5[file, "Data"];
-      dims = ImportHDF5[file, "Dimensions"];
+      datasets = ReadDatasets[absfile];
+      annotations = ImportHDF5[absfile, "Annotations"];
+      data = ImportHDF5[absfile, "Data"];
+      dims = ImportHDF5[absfile, "Dimensions"];
       {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims},
 
       _,
-      ReadDatasets[file]
+      ReadDatasets[absfile]
     ]
 ];
 
