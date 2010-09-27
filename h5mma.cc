@@ -16,54 +16,6 @@ void fail()
   MLPutSymbol(stdlink, "$Failed");
 }
 
-void nestedList(double *allData, hsize_t dims[], int rank)
-{
-  if (rank == 0)
-  {
-    cout << *allData;
-  }
-  else
-  {
-    int n = 1;
-    for (int i = 1; i < rank; i++)
-    {
-      n *= dims[i];
-    }
-    cout << "{";
-    for (int i = 0; i < dims[0]; i++)
-    {
-      nestedList(&(allData[i*n]), &dims[1], rank-1);
-      if (i != dims[0] - 1)
-        cout << ",";
-    }
-    cout << "}";
-  }
-}
-
-void nestedList(int *allData, hsize_t dims[], int rank)
-{
-  if (rank == 0)
-  {
-    cout << *allData;
-  }
-  else
-  {
-    int n = 1;
-    for (int i = 1; i < rank; i++)
-    {
-      n *= dims[i];
-    }
-    cout << "{";
-    for (int i = 0; i < dims[0]; i++)
-    {
-      nestedList(&(allData[i*n]), &dims[1], rank-1);
-      if (i != dims[0] - 1)
-        cout << ",";
-    }
-    cout << "}";
-  }
-}
-
 void ReadDatasetDimensions(const char *fileName, const char *datasetName)
 {
   try
@@ -129,17 +81,12 @@ void ReadDataset(const char *fileName, const char *datasetName)
 
      FloatType floatType = dataset.getFloatType();
      size_t size = floatType.getSize();
-//     cout << "size = " << size << endl;
 
      assert(size == 8);
 
      double *data = new double[n];
 
      dataset.read(data, floatType);
-
-//      cout << "rank " << rank << ", dimensions " <<
-//        (unsigned long)(dims_out[0]) << " x " <<
-//        (unsigned long)(dims_out[1]) << endl;
 
      long int dims[rank];
      for (int i = 0; i < rank; i++)
@@ -148,8 +95,6 @@ void ReadDataset(const char *fileName, const char *datasetName)
      }
 
      MLPutRealArray(stdlink,data,dims,NULL,rank);
-
-//     nestedList(data, dims_out, rank);
 
    }  // end of try block
 
@@ -186,38 +131,6 @@ void ReadDataset(const char *fileName, const char *datasetName)
    }
 }
 
-// static void read_o_s(char *fname, char *dname, double *ox, double *oy, double *oz,
-//                      double *sx, double *sy, double *sz)
-// {
-//      int file_id, data_id, attr_id, attr_err;
-//      double tmp[3];
-
-//      file_id = H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT);
-//      data_id = H5Dopen(file_id,dname);
-//      attr_id = H5Aopen_name(data_id, "origin");
-//      attr_err = H5Aread(attr_id, H5T_IEEE_F64LE, &tmp);
-//      *oz = tmp[0];
-//      *oy = tmp[1];
-//      *ox = tmp[2];
-//      H5Aclose(attr_id);
-//      H5Dclose(data_id);
-//      H5Fclose(file_id);
-//      file_id = H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT);
-//      data_id = H5Dopen(file_id,dname);
-//      attr_id = H5Aopen_name(data_id, "delta");
-//      attr_err = H5Aread(attr_id, H5T_IEEE_F64LE, &tmp);
-//      *sz = tmp[0];
-//      *sy = tmp[1];
-//      *sx = tmp[2];
-//      H5Aclose(attr_id);
-//      H5Dclose(data_id);
-//      H5Fclose(file_id);
-
-//      return;
-// }
-
-
-
 void ReadDatasetAttributes(const char *fileName, const char *datasetName)
 {
   try
@@ -231,16 +144,11 @@ void ReadDatasetAttributes(const char *fileName, const char *datasetName)
 
      for (int i = 0; i < nAttrs; i++)
      {
-//       cout << "attr: " << i << endl;
        Attribute attr = dataset.openAttribute(i);
        string name(attr.getName());
-//       cout << "name == " << name << endl;
        DataType dataType = attr.getDataType();
-//       cout << "dataType == " << dataType.fromClass() << endl;
-//       cout << "dataType.getSize() == " << dataType.getSize() << endl;
        int size = dataType.getSize();
 
-       cout << name << " -> ";
        MLPutFunction(stdlink, "Rule", 2);
        MLPutString(stdlink, name.c_str());
 
@@ -249,7 +157,6 @@ void ReadDatasetAttributes(const char *fileName, const char *datasetName)
        {
          DataSpace space(attr.getSpace());
          int nDims = space.getSimpleExtentNdims();
-//         cout << "nDims == " << nDims << endl;
          hsize_t dims[nDims];
          space.getSimpleExtentDims(dims);
          int n = 1;
@@ -268,13 +175,6 @@ void ReadDatasetAttributes(const char *fileName, const char *datasetName)
          attr.read(dataType, values);
 
          if (dataType.getClass() == H5T_INTEGER)
-           nestedList((int *) values, dims, nDims);
-         else if (dataType.getClass() == H5T_FLOAT)
-           nestedList((double *) values, dims, nDims);
-
-         cout << endl;
-
-         if (dataType.getClass() == H5T_INTEGER)
            MLPutIntegerArray(stdlink,(int *) values, idims, 0, nDims);
          else if (dataType.getClass() == H5T_FLOAT)
            MLPutRealArray(stdlink,(double *) values, idims, 0, nDims);
@@ -283,7 +183,6 @@ void ReadDatasetAttributes(const char *fileName, const char *datasetName)
        {
          char str[size];
          attr.read(dataType, str);
-         cout << str << endl;
          MLPutString(stdlink, str);
        }
        else
@@ -291,8 +190,6 @@ void ReadDatasetAttributes(const char *fileName, const char *datasetName)
          cout << "<unsupported attribute type>" << endl;
          MLPutSymbol(stdlink, "Null");
        }
-
-       //     cout << endl;
      }
    }  // end of try block
 
@@ -413,9 +310,6 @@ void ReadDatasets(const char *fileName)
 }
 
 int main(int argc, char* argv[]) 
-{ 
-//  ReadDataset(argv[1], argv[2]);
-//  ReadDatasetAttributes(argv[1], argv[2]);
-
+{
   return MLMain(argc, argv); 
 } 
