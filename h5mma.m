@@ -47,7 +47,8 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
 
     Switch[elements,
       "Datasets"|{"Datasets"},
-      ReadDatasets[absfile],
+      Monitor[ReadDatasets[absfile],
+        Row[{ProgressIndicator[dsIndex]," Reading file "<>FileNameTake[absfile]<>": "<>ToString[Floor[100*dsIndex]]<>"% complete"}]],
 
       {"Datasets", _String},
       ReadDataset[absfile, elements[[2]]],
@@ -85,7 +86,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
       {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims},
 
       _,
-      ReadDatasets[absfile]
+      Monitor[ReadDatasets[absfile],ProgressIndicator[dsIndex]]
     ]
 ];
 
