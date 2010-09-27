@@ -234,12 +234,15 @@ void ReadDatasets(const char *fileName)
      H5File  file(fileName, H5F_ACC_RDONLY);
      vector<string>  datasets;
      time_t  lastSet = time(NULL);
-     for (int i = 0; i < file.getNumObjs(); i++)
+     int numObjs = file.getNumObjs();
+
+     for (int i = 0; i < numObjs; i++)
      {
+       /* Update the dsIndex progress variable in Mathematica every second*/
        if (time(NULL) > lastSet + 1)
        {
          char status[1000];
-         snprintf(status, sizeof(status), "dsIndex = 1.0*%d/%d\n", i, file.getNumObjs());
+         snprintf(status, sizeof(status), "h5mma`Private`dsIndex = 1.0*%d/%d\n", i, numObjs);
          MLEvaluateString(stdlink, status);
 
          if (MLError(stdlink))
@@ -264,7 +267,7 @@ void ReadDatasets(const char *fileName)
        }
      }
      char status[1000];
-     snprintf(status, sizeof(status), "dsIndex = 1.0\n");
+     snprintf(status, sizeof(status), "h5mma`Private`dsIndex = 1.0\n");
      MLEvaluateString(stdlink, status);
 
      MLPutFunction(stdlink, "List", datasets.size());

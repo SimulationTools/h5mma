@@ -34,6 +34,7 @@ StyleBox[\"elements\", \"TI\"]\)] imports the specified elements from a file.";
 Begin["`Private`"];
 
 Install["h5mma"];
+dsIndex = 0.0;
 
 ImportHDF5[file_String, elements_:{"Datasets"}] := 
   Module[{useml, datasets, annotations, data, dims},
