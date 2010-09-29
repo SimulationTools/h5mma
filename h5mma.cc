@@ -348,7 +348,9 @@ void ReadDatasetNames(const char *fileName)
 
 herr_t put_dataset_name(hid_t loc_id, const char *name, void *opdata)
 {
-  MLPutString(stdlink, name);
+  char buf[1024];
+  snprintf(buf, sizeof buf, "/%s", name);
+  MLPutString(stdlink, buf);
   return 0;
 }
 
