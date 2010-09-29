@@ -10,7 +10,7 @@
 using namespace H5;
 using namespace std;
 
-extern "C" herr_t put_dataset_name(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *opdata);
+extern "C" herr_t put_dataset_name(hid_t loc_id, const char *name, void *opdata);
 
 void fail()
 {
@@ -308,7 +308,7 @@ void ReadDatasetNames(const char *fileName)
     H5Gget_info( file.getId(), &group_info  );
 
     MLPutFunction(stdlink, "List", group_info.nlinks );
-    H5Literate(file.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, send_dataset_name, NULL);
+    file.iterateElems("/", NULL, put_dataset_name, NULL);
   }  // end of try block
 
   // catch failure caused by the H5File operations
@@ -346,7 +346,7 @@ void ReadDatasetNames(const char *fileName)
   return;
 }
 
-herr_t send_dataset_name(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *opdata)
+herr_t put_dataset_name(hid_t loc_id, const char *name, void *opdata)
 {
   MLPutString(stdlink, name);
   return 0;
