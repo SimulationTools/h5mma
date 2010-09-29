@@ -16,7 +16,7 @@ PKGFILES = MacOSX-x86-64 h5mma.m h5mma.nb phi.0.xy.h5 Kernel
 all : h5mma
 
 h5mma : h5mmatm.cc h5mma.cc
-	${MCC} -n -I$(H5DIR)/include -I$(CADDSDIR) h5mma.cc h5mmatm.cc -L$(H5DIR)/lib -lhdf5_cpp -lhdf5 -xo h5mma
+	${MCC} -n -Wall -I$(H5DIR)/include -I$(CADDSDIR) h5mma.cc h5mmatm.cc -L$(H5DIR)/lib -lhdf5_cpp -lhdf5 -xo h5mma
 	cp -R h5mma/* ./
 	rm -r h5mma
 
