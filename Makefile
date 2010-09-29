@@ -34,4 +34,4 @@ h5mmatm.cc : h5mma.tm
 
 .PHONY : clean
 clean :
-	-rm -rf h5mmatm.cc MacOSX-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2
+	-rm -rf h5mmatm.cc MacOSX-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o
