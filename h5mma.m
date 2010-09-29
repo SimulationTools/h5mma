@@ -73,7 +73,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
       datasets = ReadDatasetNames[absfile];
       ImportHDF5[absfile, {elements[[1]], datasets[[elements[[2]]]]}],
 
-      {_String, _String},
+      {"Datasets"|"Dimensions"|"Annotations", _String},
       First[ImportHDF5[absfile, {elements[[1]], {elements[[2]]}}]],
 
       "Rules"|{"Rules"},
@@ -81,7 +81,10 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
       annotations = ImportHDF5[absfile, "Annotations"];
       data = ImportHDF5[absfile, "Data"];
       dims = ImportHDF5[absfile, "Dimensions"];
-      {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims}
+      {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims},
+
+      _,
+      $Failed
     ]
 ];
 
