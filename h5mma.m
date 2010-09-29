@@ -35,7 +35,6 @@ ImportHDF5::nffil = "File not found during import.";
 Begin["`Private`"];
 
 Install["h5mma"];
-dsIndex = 0.0;
 
 ImportHDF5[file_String, elements_:{"Datasets"}] := 
   Module[{absfile, datasets, annotations, data, dims},
@@ -45,50 +44,44 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
       Return[$Failed]
     ];
 
-    dsIndex = 0.0;
-
     Switch[elements,
       "Datasets"|{"Datasets"},
-      Monitor[ReadDatasets[absfile],
-        Row[{ProgressIndicator[dsIndex]," Reading file "<>FileNameTake[absfile]<>": "<>ToString[Floor[100*dsIndex]]<>"% complete"}]],
+      ReadDatasetNames[absfile],
 
-      {"Datasets", _String},
-      ReadDataset[absfile, elements[[2]]],
+      {"Datasets", _List},
+      ReadDatasets[absfile, elements[[2]]],
 
       "Data"|{"Data"},
-      datasets = ReadDatasets[absfile];
-      ReadDataset[absfile, #]& /@ datasets,
+      datasets = ReadDatasetNames[absfile];
+      ReadDatasets[absfile, datasets],
 
-      {"Dimensions", _String},
+      {"Dimensions", _List},
       ReadDatasetDimensions[absfile, elements[[2]]],
 
       "Dimensions"|{"Dimensions"},
-      datasets = ReadDatasets[absfile];
-      ReadDatasetDimensions[absfile, #]& /@ datasets,
+      datasets = ReadDatasetNames[absfile];
+      ReadDatasetDimensions[absfile, datasets],
 
-      {"Annotations", _String},
+      {"Annotations", _List},
       ReadDatasetAttributes[absfile, elements[[2]]],
 
       "Annotations"|{"Annotations"},
-      datasets = ReadDatasets[absfile];
-      ReadDatasetAttributes[absfile, #]& /@ datasets,
+      datasets = ReadDatasetNames[absfile];
+      ReadDatasetAttributes[absfile, datasets],
 
       {_String, _Integer},
-      datasets = ReadDatasets[absfile];
+      datasets = ReadDatasetNames[absfile];
       ImportHDF5[absfile, {elements[[1]], datasets[[elements[[2]]]]}],
 
-      {_String, _List},
-      ImportHDF5[absfile, {elements[[1]], #}]& /@ elements[[2]],
+      {_String, _String},
+      First[ImportHDF5[absfile, {elements[[1]], {elements[[2]]}}]],
 
       "Rules"|{"Rules"},
-      datasets = ReadDatasets[absfile];
+      datasets = ReadDatasetNames[absfile];
       annotations = ImportHDF5[absfile, "Annotations"];
       data = ImportHDF5[absfile, "Data"];
       dims = ImportHDF5[absfile, "Dimensions"];
-      {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims},
-
-      _,
-      Monitor[ReadDatasets[absfile],ProgressIndicator[dsIndex]]
+      {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims}
     ]
 ];
 

@@ -9,307 +9,347 @@
 
 using namespace H5;
 using namespace std;
-using std::string;
+
+extern "C" herr_t put_dataset_name(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *opdata);
 
 void fail()
 {
   MLPutSymbol(stdlink, "$Failed");
 }
 
-void ReadDatasetDimensions(const char *fileName, const char *datasetName)
+/* Get the list of requested datasets from Mathematica */
+long GetDatasetNames(vector<string> *datasetNames)
 {
-  try
-   {
-     H5File  file(fileName, H5F_ACC_RDONLY);
-     DataSet dataset = file.openDataSet(datasetName);
-     DataSpace dataspace = dataset.getSpace();
-     const int rank = dataspace.getSimpleExtentNdims();
-     hsize_t dims_out[rank];
-     int ndims = dataspace.getSimpleExtentDims(dims_out, NULL);
+  long n;
 
-     int dims[rank];
-     for (int i = 0; i < rank; i++)
-     {
-       dims[i] = dims_out[i];
-     }
+  MLCheckFunction(stdlink, "List", &n);
 
-     MLPutIntegerList(stdlink, dims, rank);
-   }
+  for(int j=0; j<n; j++)
+  {
+    const char *datasetName;
+    if(MLGetString(stdlink, &datasetName))
+    {
+      datasetNames->push_back(datasetName);
+      MLReleaseString(stdlink, datasetName);
+    } else {
+      cout << "Error receiving dataset names: " << MLError(stdlink) << endl;
+      return -1;
+    }
+  }
 
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
-      error.printError();
-      fail();
-      return;
-   }
-
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
-
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
+  return n;
 }
 
-void ReadDataset(const char *fileName, const char *datasetName)
+void ReadDatasetDimensions(const char *fileName)
 {
+  vector<string> datasetNames;
+  long n = GetDatasetNames(&datasetNames);
+
+  if(n<0)
+  {
+    fail();
+    return;
+  }
+
   try
-   {
-     H5File  file(fileName, H5F_ACC_RDONLY);
-     DataSet dataset = file.openDataSet(datasetName);
-     H5T_class_t type_class = dataset.getTypeClass();
-     assert(type_class == H5T_FLOAT);
-     DataSpace dataspace = dataset.getSpace();
-     const int rank = dataspace.getSimpleExtentNdims();
-     hsize_t dims_out[rank];
-     int ndims = dataspace.getSimpleExtentDims(dims_out, NULL);
-     int n = 1;
-     for (int i = 0; i < rank; i++)
-     {
-       n *= dims_out[i];
-     }
+  {
+    H5File  file(fileName, H5F_ACC_RDONLY);
 
-     FloatType floatType = dataset.getFloatType();
-     size_t size = floatType.getSize();
+    MLPutFunction(stdlink, "List", n);
 
-     assert(size == 8);
+    /* Loop over all requested datasets */
+    for(int i=0; i<n; i++)
+    {
+      DataSet dataset = file.openDataSet(datasetNames[i].c_str());
+      DataSpace dataspace = dataset.getSpace();
+      const int rank = dataspace.getSimpleExtentNdims();
+      hsize_t dims_out[rank];
+      dataspace.getSimpleExtentDims(dims_out, NULL);
 
-     double *data = new double[n];
+      int dims[rank];
+      for (int j = 0; j < rank; j++)
+      {
+        dims[j] = dims_out[j];
+      }
 
-     dataset.read(data, floatType);
+      MLPutIntegerList(stdlink, dims, rank);
+    }
+  }
 
-     long int dims[rank];
-     for (int i = 0; i < rank; i++)
-     {
-       dims[i] = dims_out[i];
-     }
+  // catch failure caused by the H5File operations
+  catch( FileIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+  // catch failure caused by the DataSet operations
+  catch( DataSetIException error )
+  {
+    fail();
+    error.printError();
+    return;
+  }
 
-     MLPutRealArray(stdlink,data,dims,NULL,rank);
-
-   }  // end of try block
-
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
-      error.printError();
-      fail();
-      return;
-   }
-
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
-
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
-
-   // catch failure caused by the DataSpace operations
-   catch( DataTypeIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
+  // catch failure caused by the DataSpace operations
+  catch( DataSpaceIException error )
+  {
+    fail();
+    error.printError();
+    return;
+  }
 }
-
-void ReadDatasetAttributes(const char *fileName, const char *datasetName)
-{
-  try
-   {
-     H5File  file(fileName, H5F_ACC_RDONLY);
-     DataSet dataset = file.openDataSet(datasetName);
-
-     int nAttrs = dataset.getNumAttrs();
-
-     MLPutFunction(stdlink, "List", nAttrs);
-
-     for (int i = 0; i < nAttrs; i++)
-     {
-       Attribute attr = dataset.openAttribute(i);
-       string name(attr.getName());
-       DataType dataType = attr.getDataType();
-       int size = dataType.getSize();
-
-       MLPutFunction(stdlink, "Rule", 2);
-       MLPutString(stdlink, name.c_str());
-
-       if ((dataType.getClass() == H5T_INTEGER && size == 4) || 
-           (dataType.getClass() == H5T_FLOAT) && size == 8)
-       {
-         DataSpace space(attr.getSpace());
-         int nDims = space.getSimpleExtentNdims();
-         hsize_t dims[nDims];
-         space.getSimpleExtentDims(dims);
-         int n = 1;
-         for (int j = 0; j < nDims; j++)
-         {
-           n *= dims[j];
-         }
-
-         long int idims[nDims];
-         for (int i = 0; i < nDims; i++)
-         {
-           idims[i] = dims[i];
-         }
-
-         void *values = new char[n*size];
-         attr.read(dataType, values);
-
-         if (dataType.getClass() == H5T_INTEGER)
-           MLPutIntegerArray(stdlink,(int *) values, idims, 0, nDims);
-         else if (dataType.getClass() == H5T_FLOAT)
-           MLPutRealArray(stdlink,(double *) values, idims, 0, nDims);
-       }
-       else if (dataType.getClass() == H5T_STRING)
-       {
-         char str[size];
-         attr.read(dataType, str);
-         MLPutString(stdlink, str);
-       }
-       else
-       {
-         cout << "<unsupported attribute type>" << endl;
-         MLPutSymbol(stdlink, "Null");
-       }
-     }
-   }  // end of try block
-
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
-      error.printError();
-      fail();
-      return;
-   }
-
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
-
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
-
-   // catch failure caused by the DataSpace operations
-   catch( DataTypeIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
-}
-
 
 void ReadDatasets(const char *fileName)
 {
-   try
-   {
-     H5File  file(fileName, H5F_ACC_RDONLY);
-     vector<string>  datasets;
-     time_t  lastSet = time(NULL);
-     int numObjs = file.getNumObjs();
+  vector<string> datasetNames;
+  long n = GetDatasetNames(&datasetNames);
 
-     for (int i = 0; i < numObjs; i++)
-     {
-       /* Update the dsIndex progress variable in Mathematica every second*/
-       if (time(NULL) > lastSet + 1)
-       {
-         char status[1000];
-         snprintf(status, sizeof(status), "h5mma`Private`dsIndex = 1.0*%d/%d\n", i, numObjs);
-         MLEvaluateString(stdlink, status);
+  if(n<0)
+  {
+    fail();
+    return;
+  }
 
-         if (MLError(stdlink))
-         {
-           fail();
-           return;
-         }
-         lastSet = time(NULL);
-       }
+  try
+  {
+    H5File  file(fileName, H5F_ACC_RDONLY);
 
-       string name(file.getObjnameByIdx(i));
-       H5G_stat_t object_info;
-       file.getObjinfo(name, object_info);
-       if (object_info.type == H5G_DATASET)
-       {
-         datasets.push_back("/"+name);
-       }      
-       if (MLAbort)
-       {
-         fail();
-         return;
-       }
-     }
-     char status[1000];
-     snprintf(status, sizeof(status), "h5mma`Private`dsIndex = 1.0\n");
-     MLEvaluateString(stdlink, status);
+    MLPutFunction(stdlink, "List", n);
 
-     MLPutFunction(stdlink, "List", datasets.size());
-     for (int i = 0; i < datasets.size(); i++)
-     {
-       MLPutString(stdlink, datasets[i].c_str());
-     }
-   }  // end of try block
+    /* Loop over all requested datasets */
+    for(int i=0; i<n; i++)
+    {
+      DataSet dataset = file.openDataSet(datasetNames[i].c_str());
+      H5T_class_t type_class = dataset.getTypeClass();
+      assert(type_class == H5T_FLOAT);
+      DataSpace dataspace = dataset.getSpace();
+      const int rank = dataspace.getSimpleExtentNdims();
+      hsize_t dims_out[rank];
+      dataspace.getSimpleExtentDims(dims_out, NULL);
+      int nElems = 1;
+      for (int j = 0; j < rank; j++)
+      {
+        nElems *= dims_out[j];
+      }
 
-   // catch failure caused by the H5File operations
-   catch( FileIException error )
-   {
-      error.printError();
-      fail();
-      return;
-   }
+      FloatType floatType = dataset.getFloatType();
+      size_t size = floatType.getSize();
 
-   // catch failure caused by the DataSet operations
-   catch( DataSetIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
+      assert(size == 8);
 
-   // catch failure caused by the DataSpace operations
-   catch( DataSpaceIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
+      double *data = new double[nElems];
 
-   // catch failure caused by the DataSpace operations
-   catch( DataTypeIException error )
-   {
-      fail();
-      error.printError();
-      return;
-   }
+      dataset.read(data, floatType);
 
-   return;
+      long int dims[rank];
+      for (int j = 0; j < rank; j++)
+      {
+        dims[j] = dims_out[j];
+      }
+
+      MLPutRealArray(stdlink,data,dims,NULL,rank);
+      delete[] data;
+    }
+  }  // end of try block
+
+  // catch failure caused by the H5File operations
+  catch( FileIException error )
+  {
+     error.printError();
+     fail();
+     return;
+  }
+
+  // catch failure caused by the DataSet operations
+  catch( DataSetIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch( DataSpaceIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch( DataTypeIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+}
+
+void ReadDatasetAttributes(const char *fileName)
+{
+  vector<string> datasetNames;
+  long n = GetDatasetNames(&datasetNames);
+
+  if(n<0)
+  {
+    fail();
+    return;
+  }
+
+  try
+  {
+    H5File  file(fileName, H5F_ACC_RDONLY);
+
+    MLPutFunction(stdlink, "List", n);
+
+    /* Loop over all requested datasets */
+    for(int i=0; i<n; i++)
+    {
+      DataSet dataset = file.openDataSet(datasetNames[i].c_str());
+
+      int nAttrs = dataset.getNumAttrs();
+
+      MLPutFunction(stdlink, "List", nAttrs);
+
+      for (int j = 0; j < nAttrs; j++)
+      {
+        Attribute attr = dataset.openAttribute(j);
+        string name(attr.getName());
+        DataType dataType = attr.getDataType();
+        int size = dataType.getSize();
+
+        MLPutFunction(stdlink, "Rule", 2);
+        MLPutString(stdlink, name.c_str());
+
+        if ((dataType.getClass() == H5T_INTEGER && size == 4) ||
+            (dataType.getClass() == H5T_FLOAT) && size == 8)
+        {
+          DataSpace space(attr.getSpace());
+          int nDims = space.getSimpleExtentNdims();
+          hsize_t dims[nDims];
+          space.getSimpleExtentDims(dims);
+          int nElems = 1;
+          for (int k = 0; k < nDims; k++)
+          {
+            nElems *= dims[k];
+          }
+
+          long int idims[nDims];
+          for (int k = 0; k < nDims; k++)
+          {
+            idims[k] = dims[k];
+          }
+
+          char* values = new char[nElems*size];
+          attr.read(dataType, (void *)values);
+
+          if (dataType.getClass() == H5T_INTEGER)
+            MLPutIntegerArray(stdlink,(int *) values, idims, 0, nDims);
+          else if (dataType.getClass() == H5T_FLOAT)
+            MLPutRealArray(stdlink,(double *) values, idims, 0, nDims);
+
+          delete[] values;
+        }
+        else if (dataType.getClass() == H5T_STRING)
+        {
+          char str[size];
+          attr.read(dataType, str);
+          MLPutString(stdlink, str);
+        }
+        else
+        {
+          MLPutSymbol(stdlink, "Null");
+        }
+      }
+    }
+  }  // end of try block
+
+  // catch failure caused by the H5File operations
+  catch( FileIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  // catch failure caused by the DataSet operations
+  catch( DataSetIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch( DataSpaceIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch( DataTypeIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+}
+
+
+void ReadDatasetNames(const char *fileName)
+{
+  try
+  {
+    H5File  file(fileName, H5F_ACC_RDONLY);
+    H5G_info_t group_info;
+    H5Gget_info( file.getId(), &group_info  );
+
+    MLPutFunction(stdlink, "List", group_info.nlinks );
+    H5Literate(file.getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, send_dataset_name, NULL);
+  }  // end of try block
+
+  // catch failure caused by the H5File operations
+  catch( FileIException error )
+  {
+     error.printError();
+     fail();
+     return;
+  }
+
+  // catch failure caused by the DataSet operations
+  catch( DataSetIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch( DataSpaceIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  // catch failure caused by the DataSpace operations
+  catch( DataTypeIException error )
+  {
+     fail();
+     error.printError();
+     return;
+  }
+
+  return;
+}
+
+herr_t send_dataset_name(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *opdata)
+{
+  MLPutString(stdlink, name);
+  return 0;
 }
 
 int main(int argc, char* argv[]) 

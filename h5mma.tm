@@ -3,33 +3,33 @@
 
 :Begin: 
 :Function:       ReadDatasets
-:Pattern:        ReadDatasets[fileName_String]
-:Arguments:      { fileName } 
-:ArgumentTypes:  { String } 
+:Pattern:        ReadDatasets[fileName_String, datasets:{__String}]
+:Arguments:      { fileName, datasets }
+:ArgumentTypes:  { String, Manual }
 :ReturnType:     Manual
-:End: 
+:End:
 
 :Begin: 
-:Function:       ReadDataset
-:Pattern:        ReadDataset[fileName_String, datasetName_String]
-:Arguments:      { fileName, datasetName } 
-:ArgumentTypes:  { String, String } 
+:Function:       ReadDatasetNames
+:Pattern:        ReadDatasetNames[fileName_String]
+:Arguments:      { fileName }
+:ArgumentTypes:  { String }
 :ReturnType:     Manual
-:End: 
+:End:
 
 :Begin:
 :Function:       ReadDatasetDimensions
-:Pattern:        ReadDatasetDimensions[fileName_String, datasetName_String]
-:Arguments:      { fileName, datasetName }
-:ArgumentTypes:  { String, String }
+:Pattern:        ReadDatasetDimensions[fileName_String, datasets:{__String}]
+:Arguments:      { fileName, datasets }
+:ArgumentTypes:  { String, Manual }
 :ReturnType:     Manual
 :End:
 
 :Begin: 
 :Function:       ReadDatasetAttributes
-:Pattern:        ReadDatasetAttributes[fileName_String, datasetName_String]
-:Arguments:      { fileName, datasetName } 
-:ArgumentTypes:  { String, String } 
+:Pattern:        ReadDatasetAttributes[fileName_String, datasets:{__String}]
+:Arguments:      { fileName, datasets }
+:ArgumentTypes:  { String, Manual }
 :ReturnType:     Manual
 :End: 
 
