@@ -10,7 +10,7 @@
 using namespace H5;
 using namespace std;
 
-herr_t put_dataset_name(hid_t loc_id, const char *name, void *opdata);
+extern "C" herr_t put_dataset_name(hid_t o_id, const char *name, const H5O_info_t *object_info, void *op_data);
 
 void fail()
 {
@@ -306,7 +306,7 @@ void ReadDatasetNames(const char *fileName)
     H5File  file(fileName, H5F_ACC_RDONLY);
     vector<string> datasetNames;
 
-    file.iterateElems("/", NULL, put_dataset_name, &datasetNames);
+    H5Ovisit(file.getId(), H5_INDEX_NAME, H5_ITER_NATIVE, put_dataset_name, &datasetNames);
 
     int numDatasets = datasetNames.size();
     MLPutFunction(stdlink, "List", numDatasets);
@@ -351,10 +351,11 @@ void ReadDatasetNames(const char *fileName)
   return;
 }
 
-herr_t put_dataset_name(hid_t loc_id, const char *name, void *opdata)
+herr_t put_dataset_name(hid_t o_id, const char *name, const H5O_info_t *object_info, void *op_data)
 {
-  vector<string> *datasetNames = (vector<string> *)opdata;
-  datasetNames->push_back("/" + string(name));
+  vector<string> *datasetNames = (vector<string> *)op_data;
+  if(object_info->type == H5O_TYPE_DATASET)
+    datasetNames->push_back("/" + string(name));
   return 0;
 }
 
