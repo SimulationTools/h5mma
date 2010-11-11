@@ -46,7 +46,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
 
     Switch[elements,
       "Datasets"|{"Datasets"},
-      ReadDatasetNames[absfile],
+      ReadDatasetNamesFast[absfile],
 
       {"Datasets", _List},
       ReadDatasets[absfile, elements[[2]]],

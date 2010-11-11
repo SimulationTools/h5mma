@@ -13,6 +13,7 @@ using namespace std;
 extern "C"
 {
   herr_t put_dataset_name(hid_t o_id, const char *name, const H5O_info_t *object_info, void *op_data);
+  herr_t put_dataset_name_fast(hid_t loc_id, const char *name, const H5L_info_t*, void *opdata);
   herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data);
 }
 
@@ -200,6 +201,23 @@ void ReadDatasetNames(const char *fileName)
     MLPutString(stdlink, datasetNames[i].c_str());
   }
 
+
+void ReadDatasetNamesFast(const char *fileName)
+{
+  hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
+  if (file < 0) {fail(); return;};
+  vector<string> datasetNames;
+
+  H5Literate_by_name(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL, put_dataset_name_fast, &datasetNames, H5P_DEFAULT);
+
+  int numDatasets = datasetNames.size();
+  MLPutFunction(stdlink, "List", numDatasets);
+  for(int i=0; i<numDatasets; i++)
+  {
+    MLPutString(stdlink, datasetNames[i].c_str());
+  }
+
+  if (H5Fclose(file) < 0) {fail(); return;};
   return;
 }
 
@@ -210,6 +228,15 @@ herr_t put_dataset_name(hid_t o_id, const char *name, const H5O_info_t *object_i
     datasetNames->push_back("/" + string(name));
   return 0;
 }
+
+herr_t put_dataset_name_fast(hid_t loc_id, const char *name, const H5L_info_t*, void *opdata)
+{
+  vector<string> *datasetNames = (vector<string> *)opdata;
+  datasetNames->push_back("/" + string(name));
+  return 0;
+}
+
+
 
 herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
 {

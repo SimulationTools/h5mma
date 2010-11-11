@@ -18,6 +18,14 @@
 :End:
 
 :Begin:
+:Function:       ReadDatasetNamesFast
+:Pattern:        ReadDatasetNamesFast[fileName_String]
+:Arguments:      { fileName }
+:ArgumentTypes:  { String }
+:ReturnType:     Manual
+:End:
+
+:Begin:
 :Function:       ReadDatasetDimensions
 :Pattern:        ReadDatasetDimensions[fileName_String, datasets:{__String}]
 :Arguments:      { fileName, datasets }
