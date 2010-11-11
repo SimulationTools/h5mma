@@ -44,6 +44,8 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
       Return[$Failed]
     ];
 
+    Check[
+
     Switch[elements,
       "Datasets"|{"Datasets"},
       ReadDatasetNamesFast[absfile],
@@ -85,7 +87,10 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
 
       _,
       $Failed
-    ]
+    ],
+
+    Throw["Error reading HDF5 data"], {LinkObject::linkd}]
+
 ];
 
 End[];
