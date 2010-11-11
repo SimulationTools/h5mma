@@ -79,7 +79,10 @@ void ReadDatasetDimensions(const char *fileName)
     }
 
     MLPutIntegerList(stdlink, dims, rank);
+    if (H5Sclose(dataspace) < 0) {fail(); return;};
+    if (H5Dclose(dataset) < 0) {fail(); return;};
   }
+  if (H5Fclose(file) < 0) {fail(); return;};
 }
 
 void ReadDatasets(const char *fileName)
@@ -151,7 +154,12 @@ void ReadDatasets(const char *fileName)
 
     MLPutRealArray(stdlink, data, dims, NULL, rank);
     delete[] data;
+    if (H5Sclose(dataspace) < 0) {fail(); return;};
+    if (H5Tclose(datatype) < 0) {fail(); return;};
+    if (H5Dclose(dataset) < 0) {fail(); return;};
   }
+//  if (H5Fclose(file) < 0) {fail(); return;};
+
 }
 
 void ReadDatasetAttributes(const char *fileName)
@@ -183,13 +191,15 @@ void ReadDatasetAttributes(const char *fileName)
     MLPutFunction(stdlink, "List", nAttrs);
 
     H5Aiterate(dataset, H5_INDEX_NAME, H5_ITER_NATIVE, 0, put_dataset_attribute, NULL);
+    if (H5Dclose(dataset) < 0) {fail(); return;};
   }
+  if (H5Fclose(file) < 0) {fail(); return;};
 }
-
 
 void ReadDatasetNames(const char *fileName)
 {
   hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
+  if (file < 0) {fail(); return;};
   vector<string> datasetNames;
 
   H5Ovisit(file, H5_INDEX_NAME, H5_ITER_NATIVE, put_dataset_name, &datasetNames);
@@ -201,6 +211,9 @@ void ReadDatasetNames(const char *fileName)
     MLPutString(stdlink, datasetNames[i].c_str());
   }
 
+  if (H5Fclose(file) < 0) {fail(); return;};
+  return;
+}
 
 void ReadDatasetNamesFast(const char *fileName)
 {
@@ -278,6 +291,7 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
       MLPutRealArray(stdlink,(double *) values, idims, 0, rank);
 
     delete[] values;
+    if (H5Sclose(dataspace) < 0) {fail(); return -1;};
   }
   else if (typeclass == H5T_STRING)
   {
@@ -290,6 +304,8 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
     MLPutSymbol(stdlink, "Null");
   }
 
+  if (H5Tclose(datatype) < 0) {fail(); return -1;};
+  if (H5Aclose(attr) < 0) {fail(); return -1;};
   return 0;
 }
 
