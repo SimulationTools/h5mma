@@ -1,6 +1,7 @@
 
 #include <vector>
 #include <cstring>
+#include <map>
 #include <iostream>
 #include <assert.h>
 #include "hdf5.h"
@@ -91,7 +92,19 @@ void ReadDatasets(const char *fileName)
     return;
   }
 
-  hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
+  static map<string,hid_t> files;
+
+  hid_t file;
+
+  if (files.count(fileName) > 0)
+  {
+          file = files[fileName];
+  }
+  else
+  {
+          file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
+          files[fileName] = file;
+  }
   if (file < 0) {fail(); return;}
 
   MLPutFunction(stdlink, "List", n);
