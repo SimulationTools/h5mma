@@ -55,6 +55,7 @@ void ReadDatasetDimensions(const char *fileName)
   }
 
   hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
+  if (file < 0) {fail(); return;};
 
   MLPutFunction(stdlink, "List", n);
 
@@ -62,7 +63,9 @@ void ReadDatasetDimensions(const char *fileName)
   for(int i=0; i<n; i++)
   {
     hid_t dataset = H5Dopen(file, datasetNames[i].c_str(), H5P_DEFAULT);
+    if (dataset < 0) {fail(); return;};
     hid_t dataspace = H5Dget_space(dataset);
+    if (dataspace < 0) {fail(); return;};
     const int rank = H5Sget_simple_extent_ndims(dataspace);
     hsize_t dims_out[rank];
     H5Sget_simple_extent_dims(dataspace, dims_out, NULL);
@@ -89,6 +92,7 @@ void ReadDatasets(const char *fileName)
   }
 
   hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
+  if (file < 0) {fail(); return;}
 
   MLPutFunction(stdlink, "List", n);
 
@@ -96,12 +100,18 @@ void ReadDatasets(const char *fileName)
   for(int i=0; i<n; i++)
   {
     hid_t dataset = H5Dopen(file, datasetNames[i].c_str(), H5P_DEFAULT);
+    if (file < 0) {fail(); return;}
     
     hid_t datatype = H5Dget_type(dataset);
-    assert(H5Tget_class(datatype) == H5T_FLOAT);
+    if (datatype < 0) {fail(); return;}
+    if (H5Tget_class(datatype) != H5T_FLOAT) {fail(); return;}
     
     hid_t dataspace = H5Dget_space(dataset);
+    if (dataspace < 0) {fail(); return;}
+
     const int rank = H5Sget_simple_extent_ndims(dataspace);
+    if (rank < 0) {fail(); return;}
+
     hsize_t dims_out[rank];
     H5Sget_simple_extent_dims(dataspace, dims_out, NULL);
     int nElems = 1;
@@ -112,11 +122,12 @@ void ReadDatasets(const char *fileName)
 
     size_t size = H5Tget_size(datatype);
 
-    assert(size == 8);
+    if (size != 8) {fail(); return;}
 
     double *data = new double[nElems];
 
-    H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    if (H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+      {fail(); return;}
 
     long int dims[rank];
     for (int j = 0; j < rank; j++)
@@ -141,6 +152,7 @@ void ReadDatasetAttributes(const char *fileName)
   }
 
   hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
+  if (file < 0) {fail(); return;}
 
   MLPutFunction(stdlink, "List", n);
 
@@ -148,6 +160,7 @@ void ReadDatasetAttributes(const char *fileName)
   for(int i=0; i<n; i++)
   {
     hid_t dataset = H5Dopen(file, datasetNames[i].c_str(), H5P_DEFAULT);
+    if (dataset < 0) {fail(); return;}
     
     H5O_info_t object_info;
     H5Oget_info(dataset, &object_info);
@@ -188,7 +201,9 @@ herr_t put_dataset_name(hid_t o_id, const char *name, const H5O_info_t *object_i
 herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
 {
   hid_t attr = H5Aopen(location_id, attr_name, H5P_DEFAULT);
+  if (attr < 0) {fail(); return -1;};
   hid_t datatype = H5Aget_type(attr);
+  if (datatype < 0) {fail(); return -1;}
   H5T_class_t typeclass = H5Tget_class(datatype);
   size_t size = H5Tget_size(datatype);
 
