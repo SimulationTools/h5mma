@@ -4,11 +4,15 @@
 #include <map>
 #include <iostream>
 #include <assert.h>
-#include "hdf5.h"
+#include "h5wrapper.h"
 #include "mathlink.h" 
 #include "time.h"
 
 using namespace std;
+
+#define FAIL_ML       1
+#define FAIL_HDF5     2
+#define FAIL_INVALID  3
 
 extern "C"
 {
@@ -17,8 +21,29 @@ extern "C"
   herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data);
 }
 
-void fail()
+void fail(int type, const char *err)
 {
+  char err_msg[100];
+  switch(type)
+  {
+  case FAIL_ML:
+    sprintf(err_msg, "%s\"%.76s\"%s", "Message[h5mma::mlink,", MLErrorMessage(stdlink),"]");
+    MLClearError(stdlink);
+    break;
+  case FAIL_HDF5:
+    sprintf(err_msg, "%s\"%.76s\"%s", "Message[h5mma::mlink,", err,"]");
+    break;
+  case FAIL_INVALID:
+    sprintf(err_msg, "%s\"%.76s\"%s", "Message[h5mma::mlink,", "Invalid arguments","]");
+    break;
+  default:
+    sprintf(err_msg, "%s\"%.76s\"%s", "Message[h5mma::mlink,", "Unknown error","]");
+  }
+
+  MLNewPacket(stdlink);
+  MLEvaluate(stdlink, err_msg);
+  MLNextPacket(stdlink);
+  MLNewPacket(stdlink);
   MLPutSymbol(stdlink, "$Failed");
 }
 
@@ -27,7 +52,11 @@ long GetDatasetNames(vector<string> *datasetNames)
 {
   long n;
 
-  MLCheckFunction(stdlink, "List", &n);
+  if(MLCheckFunction(stdlink, "List", &n)!=MLSUCCESS)
+  {
+    fail(FAIL_INVALID, NULL);
+    return -1;
+  }
 
   for(int j=0; j<n; j++)
   {
@@ -37,7 +66,7 @@ long GetDatasetNames(vector<string> *datasetNames)
       datasetNames->push_back(datasetName);
       MLReleaseString(stdlink, datasetName);
     } else {
-      cout << "Error receiving dataset names: " << MLError(stdlink) << endl;
+      fail(FAIL_ML, NULL);
       return -1;
     }
   }
@@ -45,164 +74,220 @@ long GetDatasetNames(vector<string> *datasetNames)
   return n;
 }
 
+/* Read dimensions of a given list of datasets in a file */
 void ReadDatasetDimensions(const char *fileName)
 {
+  /* Get the list of datasets to be read from Mathematica*/
   vector<string> datasetNames;
   long n = GetDatasetNames(&datasetNames);
-
   if(n<0)
-  {
-    fail();
+    return;
+
+  /* Create a loopback link to store the list until we are sure it can be fully
+     filled. This way if something fails we can abort and send $Failed back. */
+  MLINK loopback;
+  loopback = MLLoopbackOpen(stdenv, NULL);
+
+  if(!loopback) {
+    fail(FAIL_ML, NULL);
     return;
   }
 
-  hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
-  if (file < 0) {fail(); return;};
-
-  MLPutFunction(stdlink, "List", n);
-
-  /* Loop over all requested datasets */
-  for(int i=0; i<n; i++)
+  try
   {
-    hid_t dataset = H5Dopen(file, datasetNames[i].c_str(), H5P_DEFAULT);
-    if (dataset < 0) {fail(); return;};
-    hid_t dataspace = H5Dget_space(dataset);
-    if (dataspace < 0) {fail(); return;};
-    const int rank = H5Sget_simple_extent_ndims(dataspace);
-    hsize_t dims_out[rank];
-    H5Sget_simple_extent_dims(dataspace, dims_out, NULL);
+    /* Open requested file */
+    H5F file(fileName);
 
-    int dims[rank];
-    for (int j = 0; j < rank; j++)
+    /* Loop over all requested datasets */
+    MLPutFunction(loopback, "List", n);
+
+    for(int i=0; i<n; i++)
     {
-      dims[j] = dims_out[j];
-    }
+      /* Respond to abort from Mathematica */
+      if(MLAbort)
+      {
+        MLPutFunction(stdlink, "Abort", 0);
+        MLClose(loopback);
+        return;
+      }
 
-    MLPutIntegerList(stdlink, dims, rank);
-    if (H5Sclose(dataspace) < 0) {fail(); return;};
-    if (H5Dclose(dataset) < 0) {fail(); return;};
+      /* Open dataset and dataspace */
+      H5D dataset(file, datasetNames[i]);
+      H5S dataspace(dataset);
+
+      /* Get the number of dimensions in this dataset */
+      const int rank = dataspace.getSimpleExtentNDims();
+
+      /*  Get the size of each dimension */
+      hsize_t dims_out[rank];
+      dataspace.getSimpleExtentDims(dims_out);
+
+      int dims[rank];
+      for (int j = 0; j < rank; j++)
+      {
+        dims[j] = dims_out[j];
+      }
+
+      /* Send the dimensions of this dataset to the loopback link */
+      MLPutIntegerList(loopback, dims, rank);
+    }
   }
-  if (H5Fclose(file) < 0) {fail(); return;};
+  catch(H5Exception err) {
+    fail(FAIL_HDF5, err.getCMessage());
+    MLClose(loopback);
+    return;
+  }
+
+  /* Transfer data from loopback to actual Mathematica link */
+  MLTransferExpression(stdlink, loopback);
+
+  MLClose(loopback);
 }
 
 void ReadDatasets(const char *fileName)
 {
+  /* Get the list of datasets to be read from Mathematica*/
   vector<string> datasetNames;
   long n = GetDatasetNames(&datasetNames);
-
   if(n<0)
-  {
-    fail();
+    return;
+
+  /* Create a loopback link to store the list until we are sure it can be fully
+     filled. This way if something fails we can abort and send $Failed back. */
+  MLINK loopback;
+  loopback = MLLoopbackOpen(stdenv, NULL);
+
+  if(!loopback) {
+    fail(FAIL_ML, NULL);
     return;
   }
 
-  static map<string,hid_t> files;
-
-  hid_t file;
-
-  if (files.count(fileName) > 0)
+  try
   {
-          file = files[fileName];
-  }
-  else
-  {
-          file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
-          files[fileName] = file;
-  }
-  if (file < 0) {fail(); return;}
+    H5F file(fileName);
 
-  MLPutFunction(stdlink, "List", n);
+    MLPutFunction(loopback, "List", n);
 
-  /* Loop over all requested datasets */
-  for(int i=0; i<n; i++)
-  {
-    hid_t dataset = H5Dopen(file, datasetNames[i].c_str(), H5P_DEFAULT);
-    if (file < 0) {fail(); return;}
-    
-    hid_t datatype = H5Dget_type(dataset);
-    if (datatype < 0) {fail(); return;}
-    if (H5Tget_class(datatype) != H5T_FLOAT) {fail(); return;}
-    
-    hid_t dataspace = H5Dget_space(dataset);
-    if (dataspace < 0) {fail(); return;}
-
-    const int rank = H5Sget_simple_extent_ndims(dataspace);
-    if (rank < 0) {fail(); return;}
-
-    hsize_t dims_out[rank];
-    H5Sget_simple_extent_dims(dataspace, dims_out, NULL);
-    int nElems = 1;
-    for (int j = 0; j < rank; j++)
+    /* Loop over all requested datasets */
+    for(int i=0; i<n; i++)
     {
-      nElems *= dims_out[j];
+      /* Respond to abort from Mathematica */
+      if(MLAbort)
+      {
+        MLPutFunction(stdlink, "Abort", 0);
+        MLClose(loopback);
+        return;
+      }
+
+      H5D dataset(file, datasetNames[i]);
+
+      /* Check we have 64 bit floating point numbers */
+      H5T datatype(dataset);
+      if((H5Tget_class(datatype.getId()) != H5T_FLOAT) ||  (datatype.getSize() != 8))
+        throw(H5Exception("Unsupported datatype"));
+
+      /* Get dimensions of this dataset */
+      H5S dataspace(dataset);
+      const int rank = dataspace.getSimpleExtentNDims();
+      hsize_t dims_out[rank];
+      dataspace.getSimpleExtentDims(dims_out);
+
+      /* Read data */
+      int nElems = 1;
+      for (int j = 0; j < rank; j++)
+      {
+        nElems *= dims_out[j];
+      }
+
+      double *data = new double[nElems];
+
+      if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+
+      long int dims[rank];
+      for (int j = 0; j < rank; j++)
+      {
+        dims[j] = dims_out[j];
+      }
+
+      MLPutRealArray(loopback, data, dims, NULL, rank);
+      delete[] data;
     }
-
-    size_t size = H5Tget_size(datatype);
-
-    if (size != 8) {fail(); return;}
-
-    double *data = new double[nElems];
-
-    if (H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
-      {fail(); return;}
-
-    long int dims[rank];
-    for (int j = 0; j < rank; j++)
-    {
-      dims[j] = dims_out[j];
-    }
-
-    MLPutRealArray(stdlink, data, dims, NULL, rank);
-    delete[] data;
-    if (H5Sclose(dataspace) < 0) {fail(); return;};
-    if (H5Tclose(datatype) < 0) {fail(); return;};
-    if (H5Dclose(dataset) < 0) {fail(); return;};
   }
-//  if (H5Fclose(file) < 0) {fail(); return;};
+  catch(H5Exception err) {
+    fail(FAIL_HDF5, err.getCMessage());
+    MLClose(loopback);
+    return;
+  }
 
+  /* Transfer data from loopback to actual Mathematica link */
+  MLTransferExpression(stdlink, loopback);
+
+  MLClose(loopback);
 }
 
 void ReadDatasetAttributes(const char *fileName)
 {
+  /* Get the list of datasets to be read from Mathematica*/
   vector<string> datasetNames;
   long n = GetDatasetNames(&datasetNames);
-
   if(n<0)
-  {
-    fail();
+    return;
+
+  /* Create a loopback link to store the list until we are sure it can be fully
+     filled. This way if something fails we can abort and send $Failed back. */
+  MLINK loopback;
+  loopback = MLLoopbackOpen(stdenv, NULL);
+
+  if(!loopback) {
+    fail(FAIL_ML, NULL);
     return;
   }
 
-  hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
-  if (file < 0) {fail(); return;}
-
-  MLPutFunction(stdlink, "List", n);
-
-  /* Loop over all requested datasets */
-  for(int i=0; i<n; i++)
+  try
   {
-    hid_t dataset = H5Dopen(file, datasetNames[i].c_str(), H5P_DEFAULT);
-    if (dataset < 0) {fail(); return;}
-    
-    H5O_info_t object_info;
-    H5Oget_info(dataset, &object_info);
-    int nAttrs = object_info.num_attrs;
+    H5F file(fileName);
 
-    MLPutFunction(stdlink, "List", nAttrs);
+    MLPutFunction(loopback, "List", n);
 
-    H5Aiterate(dataset, H5_INDEX_NAME, H5_ITER_NATIVE, 0, put_dataset_attribute, NULL);
-    if (H5Dclose(dataset) < 0) {fail(); return;};
+    /* Loop over all requested datasets */
+    for(int i=0; i<n; i++)
+    {
+      /* Respond to abort from Mathematica */
+      if(MLAbort)
+      {
+        MLPutFunction(stdlink, "Abort", 0);
+        MLClose(loopback);
+        return;
+      }
+
+      H5D dataset(file, datasetNames[i]);
+      int nAttrs = dataset.getNumAttrs();
+
+      MLPutFunction(loopback, "List", nAttrs);
+
+      H5Aiterate(dataset.getId(), H5_INDEX_NAME, H5_ITER_NATIVE, 0, put_dataset_attribute, &loopback);
+    }
   }
-  if (H5Fclose(file) < 0) {fail(); return;};
+  catch(H5Exception err) {
+    fail(FAIL_HDF5, err.getCMessage());
+    MLClose(loopback);
+    return;
+  }
+
+  /* Transfer data from loopback to actual Mathematica link */
+  MLTransferExpression(stdlink, loopback);
+
+  MLClose(loopback);
 }
 
 void ReadDatasetNames(const char *fileName)
 {
-  hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
-  if (file < 0) {fail(); return;};
+  H5F file(fileName);
+
   vector<string> datasetNames;
 
-  H5Ovisit(file, H5_INDEX_NAME, H5_ITER_NATIVE, put_dataset_name, &datasetNames);
+  H5Ovisit(file.getId(), H5_INDEX_NAME, H5_ITER_NATIVE, put_dataset_name, &datasetNames);
 
   int numDatasets = datasetNames.size();
   MLPutFunction(stdlink, "List", numDatasets);
@@ -211,17 +296,16 @@ void ReadDatasetNames(const char *fileName)
     MLPutString(stdlink, datasetNames[i].c_str());
   }
 
-  if (H5Fclose(file) < 0) {fail(); return;};
   return;
 }
 
 void ReadDatasetNamesFast(const char *fileName)
 {
-  hid_t file = H5Fopen(fileName, H5F_ACC_RDONLY, H5P_DEFAULT);
-  if (file < 0) {fail(); return;};
+  H5F file(fileName);
+
   vector<string> datasetNames;
 
-  H5Literate_by_name(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL, put_dataset_name_fast, &datasetNames, H5P_DEFAULT);
+  H5Literate_by_name(file.getId(), "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL, put_dataset_name_fast, &datasetNames, H5P_DEFAULT);
 
   int numDatasets = datasetNames.size();
   MLPutFunction(stdlink, "List", numDatasets);
@@ -230,7 +314,6 @@ void ReadDatasetNamesFast(const char *fileName)
     MLPutString(stdlink, datasetNames[i].c_str());
   }
 
-  if (H5Fclose(file) < 0) {fail(); return;};
   return;
 }
 
@@ -253,23 +336,23 @@ herr_t put_dataset_name_fast(hid_t loc_id, const char *name, const H5L_info_t*, 
 
 herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
 {
-  hid_t attr = H5Aopen(location_id, attr_name, H5P_DEFAULT);
-  if (attr < 0) {fail(); return -1;};
-  hid_t datatype = H5Aget_type(attr);
-  if (datatype < 0) {fail(); return -1;}
-  H5T_class_t typeclass = H5Tget_class(datatype);
-  size_t size = H5Tget_size(datatype);
+  MLINK loopback = *((MLINK*)op_data);
 
-  MLPutFunction(stdlink, "Rule", 2);
-  MLPutString(stdlink, attr_name);
+  H5A attr(location_id, attr_name);
 
-  if ((typeclass == H5T_INTEGER && size == 4) ||
-      (typeclass == H5T_FLOAT) && size == 8)
+  H5T datatype(attr);
+  size_t size = datatype.getSize();
+
+  MLPutFunction(loopback, "Rule", 2);
+  MLPutString(loopback, attr_name);
+
+  if ((H5Tget_class(datatype.getId()) == H5T_INTEGER && size == 4) ||
+      (H5Tget_class(datatype.getId()) == H5T_FLOAT) && size == 8)
   {
-    hid_t dataspace = H5Aget_space(attr);
-    const int rank = H5Sget_simple_extent_ndims(dataspace);
+    H5S dataspace(attr);
+    const int rank = dataspace.getSimpleExtentNDims();
     hsize_t dims[rank];
-    H5Sget_simple_extent_dims(dataspace, dims, NULL);
+    dataspace.getSimpleExtentDims(dims);
     int nElems = 1;
     for (int k = 0; k < rank; k++)
     {
@@ -283,29 +366,28 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
     }
 
     char* values = new char[nElems*size];
-    H5Aread(attr, datatype, (void *)values);
+    if(H5Aread(attr.getId(), datatype.getId(), (void *)values)<0)
+      throw(H5Exception("Failed to read data for attribute"));
 
-    if (typeclass == H5T_INTEGER)
-      MLPutIntegerArray(stdlink,(int *) values, idims, 0, rank);
-    else if (typeclass == H5T_FLOAT)
-      MLPutRealArray(stdlink,(double *) values, idims, 0, rank);
+    if (H5Tget_class(datatype.getId()) == H5T_INTEGER)
+      MLPutIntegerArray(loopback,(int *) values, idims, 0, rank);
+    else if (H5Tget_class(datatype.getId()) == H5T_FLOAT)
+      MLPutRealArray(loopback,(double *) values, idims, 0, rank);
 
     delete[] values;
-    if (H5Sclose(dataspace) < 0) {fail(); return -1;};
   }
-  else if (typeclass == H5T_STRING)
+  else if (H5Tget_class(datatype.getId()) == H5T_STRING)
   {
     char str[size];
-    H5Aread(attr, datatype, str);
-    MLPutString(stdlink, str);
+    if(H5Aread(attr.getId(), datatype.getId(), (void *)str)<0)
+      throw(H5Exception("Failed to read data for attribute"));
+    MLPutString(loopback, str);
   }
   else
   {
-    MLPutSymbol(stdlink, "Null");
+    MLPutSymbol(loopback, "Null");
   }
 
-  if (H5Tclose(datatype) < 0) {fail(); return -1;};
-  if (H5Aclose(attr) < 0) {fail(); return -1;};
   return 0;
 }
 

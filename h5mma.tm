@@ -1,4 +1,6 @@
 :Evaluate: BeginPackage["h5mma`"]
+:Evaluate: h5mma::mlink = "Error from MathLink executable: `1`."
+
 :Evaluate: Begin["`Private`"]
 
 :Begin: 
