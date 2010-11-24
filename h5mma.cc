@@ -140,7 +140,7 @@ void ReadDatasetDimensions(const char *fileName)
   }
 
   /* Transfer data from loopback to actual Mathematica link */
-  MLTransferExpression(stdlink, loopback);
+  MLTransferToEndOfLoopbackLink(stdlink, loopback);
 
   MLClose(loopback);
 }
@@ -222,7 +222,7 @@ void ReadDatasets(const char *fileName)
   }
 
   /* Transfer data from loopback to actual Mathematica link */
-  MLTransferExpression(stdlink, loopback);
+  MLTransferToEndOfLoopbackLink(stdlink, loopback);
 
   MLClose(loopback);
 }
@@ -277,7 +277,7 @@ void ReadDatasetAttributes(const char *fileName)
   }
 
   /* Transfer data from loopback to actual Mathematica link */
-  MLTransferExpression(stdlink, loopback);
+  MLTransferToEndOfLoopbackLink(stdlink, loopback);
 
   MLClose(loopback);
 }
