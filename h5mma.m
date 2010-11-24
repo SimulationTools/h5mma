@@ -77,7 +77,8 @@ ImportHDF5[file_String, elements_:{"Datasets"}] :=
       ImportHDF5[absfile, {elements[[1]], datasets[[elements[[2]]]]}],
 
       {"Datasets"|"Dimensions"|"Annotations", _String},
-      First[ImportHDF5[absfile, {elements[[1]], {elements[[2]]}}]],
+      data=ImportHDF5[absfile, {elements[[1]], {elements[[2]]}}];
+      If[data===$Failed, $Failed, First[data]],
 
       "Rules"|{"Rules"},
       datasets = ReadDatasetNames[absfile];
