@@ -416,7 +416,7 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
   MLPutString(loopback, attr_name);
 
   if ((typeclass == H5T_INTEGER && size == 4) ||
-      (typeclass == H5T_FLOAT) && size == 8)
+      (typeclass == H5T_FLOAT && size == 8))
   {
     H5S dataspace(attr);
     const int rank = dataspace.getSimpleExtentNDims();
