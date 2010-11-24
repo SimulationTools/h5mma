@@ -380,13 +380,14 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
   H5A attr(location_id, attr_name);
 
   H5T datatype(attr);
+  H5T_class_t typeclass = H5Tget_class(datatype.getId());
   size_t size = datatype.getSize();
 
   MLPutFunction(loopback, "Rule", 2);
   MLPutString(loopback, attr_name);
 
-  if ((H5Tget_class(datatype.getId()) == H5T_INTEGER && size == 4) ||
-      (H5Tget_class(datatype.getId()) == H5T_FLOAT) && size == 8)
+  if ((typeclass == H5T_INTEGER && size == 4) ||
+      (typeclass == H5T_FLOAT) && size == 8)
   {
     H5S dataspace(attr);
     const int rank = dataspace.getSimpleExtentNDims();
@@ -408,14 +409,14 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
     if(H5Aread(attr.getId(), datatype.getId(), (void *)values)<0)
       throw(H5Exception("Failed to read data for attribute"));
 
-    if (H5Tget_class(datatype.getId()) == H5T_INTEGER)
+    if (typeclass == H5T_INTEGER)
       MLPutIntegerArray(loopback,(int *) values, idims, 0, rank);
-    else if (H5Tget_class(datatype.getId()) == H5T_FLOAT)
+    else if (typeclass == H5T_FLOAT)
       MLPutRealArray(loopback,(double *) values, idims, 0, rank);
 
     delete[] values;
   }
-  else if (H5Tget_class(datatype.getId()) == H5T_STRING)
+  else if (typeclass == H5T_STRING)
   {
     char str[size];
     if(H5Aread(attr.getId(), datatype.getId(), (void *)str)<0)
