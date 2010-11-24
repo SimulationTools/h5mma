@@ -184,8 +184,16 @@ void ReadDatasets(const char *fileName)
 
       /* Check we have 64 bit floating point numbers */
       H5T datatype(dataset);
-      if((H5Tget_class(datatype.getId()) != H5T_FLOAT) ||  (datatype.getSize() != 8))
+      H5T_class_t typeclass = H5Tget_class(datatype.getId());
+      size_t size = datatype.getSize();
+
+      /* Only accept 4 byte integers, 8 byte floats or 1 byte integers (as characters) */
+      if (!((typeclass == H5T_INTEGER && size == 4) ||
+            (typeclass == H5T_FLOAT && size == 8) ||
+            (typeclass == H5T_INTEGER && size == 1) ))
+      {
         throw(H5Exception("Unsupported datatype"));
+      }
 
       /* Get dimensions of this dataset */
       H5S dataspace(dataset);
@@ -200,19 +208,40 @@ void ReadDatasets(const char *fileName)
         nElems *= dims_out[j];
       }
 
-      double *data = new double[nElems];
-
-      if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
-        throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-
       long int dims[rank];
       for (int j = 0; j < rank; j++)
       {
         dims[j] = dims_out[j];
       }
 
-      MLPutRealArray(loopback, data, dims, NULL, rank);
-      delete[] data;
+      switch(typeclass)
+      {
+      case H5T_INTEGER:
+        if(size == 4)
+        {
+          int idata[nElems];
+          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata) < 0)
+            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+          MLPutIntegerArray(loopback, idata, dims, 0, rank);
+        } else if(size==1) {
+          char cdata[nElems];
+          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata) < 0)
+            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+          MLPutString(loopback, cdata);
+        }
+        break;
+      case H5T_FLOAT:
+        {
+          double fdata[nElems];
+          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+          MLPutRealArray(loopback, fdata, dims, NULL, rank);
+        }
+        break;
+      default:
+        throw(H5Exception("Data format not supported"));
+      }
+
     }
   }
   catch(H5Exception err) {
