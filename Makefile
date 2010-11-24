@@ -2,7 +2,7 @@ UNAME := $(shell uname)
 
 # Linux specific paths
 ifeq ($(UNAME), Linux)
-MLINKDIR := /cluster/MATHEMATICA/7.0.1/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64
+MLINKDIR := /cluster/MATHEMATICA/7.0.1/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
 HDF5DIR  := /cluster/hdf5/1.8.1
 endif
 
@@ -13,7 +13,7 @@ HDF5DIR  := /usr/local/hdf5-1.8.5
 endif
 
 INCS = -I${MLINKDIR} -I${HDF5DIR}/include
-LIBS = -L${MLIKNDIR} -L${HDF5DIR}/lib
+LIBS = -L${MLINKDIR} -L${HDF5DIR}/lib
 
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
@@ -23,7 +23,7 @@ PKGFILES = MacOSX-x86-64 Linux-x86-64 h5mma.m h5mma.nb phi.0.xy.h5 Kernel
 all : h5mma
 
 h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc
-	${MCC} -n -Wall $(INCS) h5mma.cc h5mmatm.cc h5wrapper.cc $(LIBS) -lhdf5_cpp -lhdf5 -xo h5mma
+	${MCC} -n -Wall $(INCS) h5mma.cc h5mmatm.cc h5wrapper.cc $(LIBS) -lhdf5 -xo h5mma
 	cp -R h5mma/* ./
 	rm -r h5mma
 
