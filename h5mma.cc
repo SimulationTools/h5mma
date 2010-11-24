@@ -3,6 +3,7 @@
 #include <cstring>
 #include <map>
 #include <iostream>
+#include <sstream>
 #include <assert.h>
 #include "h5wrapper.h"
 #include "mathlink.h" 
@@ -299,19 +300,45 @@ void ReadDatasetNames(const char *fileName)
   return;
 }
 
+class DatasetNames
+{
+public:
+  DatasetNames()
+  {
+    num_links = 0;
+    last_progress = 0.0;
+  }
+  vector<string> datasetNames;
+  int num_links;
+  double last_progress;
+};
+
 void ReadDatasetNamesFast(const char *fileName)
 {
   H5F file(fileName);
 
-  vector<string> datasetNames;
+  H5G_info_t group_info;
+  H5Gget_info_by_name(file.getId(), "/", &group_info, H5P_DEFAULT);
+  int num_links = group_info.nlinks;
 
-  H5Literate_by_name(file.getId(), "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL, put_dataset_name_fast, &datasetNames, H5P_DEFAULT);
+  DatasetNames dns;
+  dns.num_links = num_links;
 
-  int numDatasets = datasetNames.size();
+  herr_t err = H5Literate_by_name(file.getId(), "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL, 
+                                  put_dataset_name_fast, &dns, H5P_DEFAULT);
+
+  if (err < 0)
+  {
+    MLPutFunction(stdlink, "Abort", 0);
+    return;
+  }
+
+  int numDatasets = dns.datasetNames.size();
+
   MLPutFunction(stdlink, "List", numDatasets);
   for(int i=0; i<numDatasets; i++)
   {
-    MLPutString(stdlink, datasetNames[i].c_str());
+    MLPutString(stdlink, dns.datasetNames[i].c_str());
   }
 
   return;
@@ -327,11 +354,23 @@ herr_t put_dataset_name(hid_t o_id, const char *name, const H5O_info_t *object_i
 
 herr_t put_dataset_name_fast(hid_t loc_id, const char *name, const H5L_info_t*, void *opdata)
 {
-  vector<string> *datasetNames = (vector<string> *)opdata;
-  datasetNames->push_back("/" + string(name));
-  return 0;
-}
+  DatasetNames *dns = (DatasetNames *) opdata;
+  dns->datasetNames.push_back("/" + string(name));
 
+  double progress_frac = (double) dns->datasetNames.size() / (double) dns->num_links;
+
+  if (progress_frac - dns->last_progress >= 0.01)
+  {
+    ostringstream progress;
+    progress << "h5mma`ReadDatasetsProgress = " << progress_frac;
+    MLEvaluateString(stdlink, (char *) progress.str().c_str());
+    dns->last_progress = progress_frac;
+  }
+
+  // Return a negative number to indicate an error if Mathematica is
+  // requesting an Abort
+  return MLAbort ? -1 : 0;
+}
 
 
 herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data)
