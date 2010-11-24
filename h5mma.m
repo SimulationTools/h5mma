@@ -31,6 +31,7 @@ StyleBox[\"Mathematica\",\nFontSlant->\"Italic\"]\) version of it.
 ImportHDF5[\"file\", \!\(\*
 StyleBox[\"elements\", \"TI\"]\)] imports the specified elements from a file.";
 ImportHDF5::nffil = "File not found during import.";
+ReadDatasetsProgress::usage = "ReadDatasetsProgress is a real number between 0 and 1 indicating the current progress of the function ReadDatasets";
 
 Begin["`Private`"];
 
