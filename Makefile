@@ -17,7 +17,7 @@ EXEDIR     = MacOSX-x86-64
 endif
 
 INCLUDES = -I${MLINKDIR} -I${HDF5DIR}/include
-LDFLAGS  = -Wl,-rpath,${MLINKDIR} -Wl,-rpath,${HDF5DIR}/lib
+LDFLAGS  = -Wl,-rpath,${MLINKDIR} -Wl,-rpath,${HDF5DIR}/lib -L${HDF5DIR}/lib
 CFLAGS   = -n -Wall -Wno-write-strings -O3 
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
@@ -28,17 +28,17 @@ all : h5mma
 
 h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h
 	${MCC} $(CFLAGS) $(INCLUDES) h5mma.cc h5mmatm.cc h5wrapper.cc $(LDFLAGS) -lhdf5 -xo h5mma
-	cp -R h5mma/* ./
-	rm -r h5mma
+	@cp -R h5mma/* ./
+	@rm -r h5mma
 
 h5mma.zip : 
-	zip -r h5mma.zip ${PKGFILES}
+	@zip -r h5mma.zip ${PKGFILES}
 	
 h5mma.tar.gz : 
-	tar -czf h5mma.tar.gz ${PKGFILES}
+	@tar -czf h5mma.tar.gz ${PKGFILES}
 	
 h5mma.tar.bz2 : 
-	tar -cjf h5mma.tar.bz2 ${PKGFILES}
+	@tar -cjf h5mma.tar.bz2 ${PKGFILES}
 
 install : h5mma.tar.gz
 	@echo "Installing in " ${INSTALLDIR}
@@ -50,4 +50,4 @@ h5mmatm.cc : h5mma.tm
 
 .PHONY : clean
 clean :
-	-rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma
+	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma
