@@ -36,10 +36,10 @@ h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h
 
 h5mma.zip : 
 	@zip -r h5mma.zip ${PKGFILES}
-	
+
 h5mma.tar.gz : 
 	@tar -czf h5mma.tar.gz ${PKGFILES}
-	
+
 h5mma.tar.bz2 : 
 	@tar -cjf h5mma.tar.bz2 ${PKGFILES}
 
