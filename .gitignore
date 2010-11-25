@@ -1,3 +1,8 @@
 *.o
 h5mma
 h5mmatm.cc
+h5mma.config
+h5mma.creator
+h5mma.creator.user
+h5mma.files
+h5mma.includes
