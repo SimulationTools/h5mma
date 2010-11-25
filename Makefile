@@ -1,5 +1,8 @@
 UNAME := $(shell uname)
 
+# Override any of the below paths in a make.defs file
+-include make.defs
+
 # Linux specific paths (for damiana)
 ifeq ($(UNAME), Linux)
 MLINKDIR   ?= /cluster/MATHEMATICA/7.0.1/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
