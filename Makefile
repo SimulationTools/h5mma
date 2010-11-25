@@ -30,6 +30,8 @@ PKGFILES = ${EXEDIR} h5mma.m Kernel
 all : h5mma
 
 h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h
+	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	${MCC} $(CFLAGS) $(INCLUDES) h5mma.cc h5mmatm.cc h5wrapper.cc $(LDFLAGS) -lhdf5 -xo h5mma
 	@cp -R h5mma/* ./
 	@rm -r h5mma
