@@ -5,7 +5,7 @@ UNAME := $(shell uname)
 
 # Linux specific paths (for damiana)
 ifeq ($(UNAME), Linux)
-MLINKDIR   ?= /cluster/MATHEMATICA/7.0.1/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
+MLINKDIR   ?= /cluster/MATHEMATICA/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
 HDF5DIR    ?= /cluster/hdf5/1.8.4-patch1
 INSTALLDIR ?= ${HOME}/.Mathematica/Applications/h5mma
 EXEDIR     = Linux-x86-64
