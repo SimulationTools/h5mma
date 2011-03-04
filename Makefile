@@ -4,10 +4,14 @@ HOSTNAME := $(shell hostname)
 # Override any of the below paths in a make.defs file
 -include make.defs
 
+# Damiana specific paths
 ifeq ($(HOSTNAME), login-damiana)
-# Linux specific paths (for damiana)
 MLINKDIR   ?= /cluster/MATHEMATICA/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
 HDF5DIR    ?= /cluster/hdf5/1.8.4-patch1
+endif
+
+ifeq ($(UNAME), Linux)
+# Linux specific paths
 INSTALLDIR ?= ${HOME}/.Mathematica/Applications/h5mma
 EXEDIR     = Linux-x86-64
 else ifeq ($(UNAME), Darwin)
