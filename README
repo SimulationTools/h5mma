@@ -1,0 +1,103 @@
+===============================================================================
+ h5mma
+===============================================================================
+ Version 0.1
+ Copyright 2011 Barry Wardell and Ian Hinder
+
+The h5mma package provides improved support for reading HDF5 files in
+Mathematica. It is significantly faster, more memory efficient and crash
+resiliant than the built-in HDF5 reading support.
+===============================================================================
+
+
+Getting the package
+-------------------
+The latest version of this software will always be available from the project
+git repository:
+
+git clone git://gitorious.org/h5mma/h5mma.git
+
+
+Requirements
+------------
+Mathematica: h5mma requires Mathematica version 6 or newer. It may be possible
+  to get it to work with older versions, but this is not supported.
+
+HDF5: A version of the HDF5 library providing the version 1.8 API is required.
+
+
+Installation
+------------
+
+Mac OSX (MacPorts):
+sudo port install hdf5-18
+make && make install
+
+Other:
+Create the file 'make.defs' using the template provided in 'make.defs.example'.
+Edit the paths in this file to point to the appropriate locations on your
+machine:
+
+HDF5DIR:    This should be the directory containing lib/libhdf5*.
+MLINKDIR:   This should be the directory containing mcc and mprep.
+INSTALLDIR: This is optional and can be used to override the directory where
+            h5mma will be installed. Sensible defaults are chosen on Linux
+            (${HOME}/.Mathematica/Applications/h5mma) and Mac OSX
+            (${HOME}/Library/Mathematica/Applications/h5mma) so this will not
+            normally need to be set.
+
+Once these paths have been set, build and install h5mma:
+make && make install
+
+Usage
+-----
+The package may then be loaded into Mathematica using the command:
+
+<< h5mma`
+
+The main command provided is ImportHDF5, which mimics the behavior of Import.
+
+
+Examples
+--------
+For example usage, see the h5mma.nb Mathematica notebook in the doc directory.
+
+
+Changelog
+---------
+ 4 Mar  2011: Initial version (0.1) released.
+
+
+Known problems
+--------------
+None.
+
+
+License
+-------
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 2.1 of the License, or (at your option)
+any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with this library; if not, write to the Free Software Foundation, Inc., 
+59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+
+
+Authors
+-------
+
+Barry Wardell
+Ian Hinder
+
+Max Planck Institute for Gravitational Physics / Albert Einstein Institute
+Am Muehlenberg 1
+14476 Potsdam
+Germany
+
+http://numrel.aei.mpg.de
