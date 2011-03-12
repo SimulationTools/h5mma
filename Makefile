@@ -1,3 +1,4 @@
+
 UNAME := $(shell uname)
 HOSTNAME := $(shell hostname)
 
@@ -15,11 +16,17 @@ ifeq ($(UNAME), Linux)
 INSTALLDIR ?= ${HOME}/.Mathematica/Applications/h5mma
 EXEDIR     = Linux-x86-64
 else ifeq ($(UNAME), Darwin)
-# Mac OSX + MacPorts specific paths
-MLINKDIR   ?= /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions
-HDF5DIR    ?= /opt/local
-INSTALLDIR ?= ${HOME}/Library/Mathematica/Applications/h5mma
-EXEDIR     = MacOSX-x86-64
+  # Mac OSX specific paths
+  MLINKDIR   ?= /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions
+  INSTALLDIR ?= ${HOME}/Library/Mathematica/Applications/h5mma
+  EXEDIR     = MacOSX-x86-64
+  ifneq ($(wildcard /opt/local/lib/libhdf5.dylib),)
+    # MacPorts
+    HDF5DIR    ?= /opt/local
+  else ifneq ($(wildcard /sw/lib/libhdf5.dylib),)
+    # Fink
+    HDF5DIR    ?= /sw
+endif
 endif
 
 INCLUDES = -I${MLINKDIR} -I${HDF5DIR}/include
