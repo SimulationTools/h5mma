@@ -6,7 +6,7 @@
 
 The h5mma package provides improved support for reading HDF5 files in
 Mathematica. It is significantly faster, more memory efficient and crash
-resiliant than the built-in HDF5 reading support.
+resilient than the built-in HDF5 reading support.
 ===============================================================================
 
 
@@ -15,8 +15,7 @@ Getting the package
 The latest version of this software will always be available from the project
 git repository:
 
-git clone git://gitorious.org/h5mma/h5mma.git
-
+git clone git://git.code.sf.net/p/h5mma/code h5mma
 
 Requirements
 ------------
