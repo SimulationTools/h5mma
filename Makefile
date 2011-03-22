@@ -35,7 +35,7 @@ CFLAGS   = -n -Wall -Wno-write-strings -O3
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
-PKGFILES = ${EXEDIR} h5mma.m Kernel
+PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER README
 
 all : h5mma
 
@@ -76,6 +76,14 @@ h5mma.tar.gz :
 h5mma.tar.bz2 : 
 	@tar -cjf h5mma.tar.bz2 ${PKGFILES}
 
+h5mma.dmg : h5mma-osx-hdf5static
+	@rm -f h5mma.sparseimage h5mma.dmg
+	@hdiutil convert empty.dmg -format UDSP -o h5mma
+	@hdiutil mount h5mma.sparseimage
+	@cp -R ${PKGFILES} /Volumes/h5mma/h5mma
+	@hdiutil eject /Volumes/h5mma
+	@hdiutil convert h5mma.sparseimage -format UDBZ -o h5mma.dmg
+
 install : h5mma.tar.gz
 	@echo "Installing in " ${INSTALLDIR}
 	@mkdir -p ${INSTALLDIR}
@@ -86,4 +94,4 @@ h5mmatm.cc : h5mma.tm
 
 .PHONY : clean
 clean :
-	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma
+	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma h5mma.dmg h5mma.sparseimage
