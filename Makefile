@@ -35,7 +35,7 @@ CFLAGS   = -n -Wall -Wno-write-strings -O3
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
-PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER README
+PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 README
 
 all : h5mma
 
