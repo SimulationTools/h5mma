@@ -35,37 +35,39 @@ CFLAGS   = -n -Wall -Wno-write-strings -O3
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
-PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 README
+PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 README BUILD_ID GIT_REVISION
 
 all : h5mma
 
-h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h
+h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
 	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	${MCC} $(CFLAGS) $(INCLUDES) h5mma.cc h5mmatm.cc h5wrapper.cc $(LDFLAGS) -lhdf5 -xo h5mma
 	@cp -R h5mma/* ./
 	@rm -r h5mma
 
-h5mma-osx-hdf5static : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h
+h5mma-osx-hdf5static : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
+	@echo "Compiling h5mma statically"
 	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@rm -rf MacOSX-x86-64
 	@mkdir MacOSX-x86-64
-	g++ $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
-	g++ $(CFLAGS) $(INCLUDES) -c h5mma.cc
-	g++ $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
-	g++ h5mma.o h5mmatm.o h5wrapper.o -F$(MLINKDIR) -framework mathlink $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a $(HDF5DIR)/lib/libz.a -o MacOSX-x86-64/h5mma
-	install_name_tool -change @executable_path/../Frameworks/mathlink.framework/Versions/3.16/mathlink $(MLINKDIR)/mathlink.framework/mathlink MacOSX-x86-64/h5mma
+	@g++ $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
+	@g++ $(CFLAGS) $(INCLUDES) -c h5mma.cc
+	@g++ $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
+	@g++ h5mma.o h5mmatm.o h5wrapper.o -F$(MLINKDIR) -framework mathlink $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a $(HDF5DIR)/lib/libz.a -o MacOSX-x86-64/h5mma
+	@install_name_tool -change @executable_path/../Frameworks/mathlink.framework/Versions/3.16/mathlink $(MLINKDIR)/mathlink.framework/mathlink MacOSX-x86-64/h5mma
 
-h5mma-osx-hdf5mmastatic : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h
+h5mma-osx-hdf5mmastatic : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
+	@echo "Compiling h5mma statically (including MathLink)"
 	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@rm -rf MacOSX-x86-64
 	@mkdir MacOSX-x86-64
-	g++ $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
-	g++ $(CFLAGS) $(INCLUDES) -c h5mma.cc
-	g++ $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
-	g++ h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi3.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a $(HDF5DIR)/lib/libz.a -framework CoreFoundation -framework Foundation -o MacOSX-x86-64/h5mma
+	@g++ $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
+	@g++ $(CFLAGS) $(INCLUDES) -c h5mma.cc
+	@g++ $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
+	@g++ h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi3.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a $(HDF5DIR)/lib/libz.a -framework CoreFoundation -framework Foundation -o MacOSX-x86-64/h5mma
 
 h5mma.zip : 
 	@zip -r h5mma.zip ${PKGFILES}
@@ -76,13 +78,15 @@ h5mma.tar.gz :
 h5mma.tar.bz2 : 
 	@tar -cjf h5mma.tar.bz2 ${PKGFILES}
 
-h5mma.dmg : h5mma-osx-hdf5static
+h5mma.dmg : h5mma-osx-hdf5static ${PKGFILES}
+	@echo "Creating h5mma-"`cat BUILD_ID`".dmg"
 	@rm -f h5mma.sparseimage h5mma.dmg
-	@hdiutil convert empty.dmg -format UDSP -o h5mma
-	@hdiutil mount h5mma.sparseimage
+	@hdiutil convert -quiet empty.dmg -format UDSP -o h5mma
+	@hdiutil mount -quiet h5mma.sparseimage
 	@cp -R ${PKGFILES} /Volumes/h5mma/h5mma
-	@hdiutil eject /Volumes/h5mma
-	@hdiutil convert h5mma.sparseimage -format UDBZ -o h5mma.dmg
+	@hdiutil eject -quiet /Volumes/h5mma
+	@hdiutil convert -quiet h5mma.sparseimage -format UDBZ -o h5mma.dmg
+	@mv h5mma.dmg h5mma-`cat BUILD_ID`.dmg
 
 install : h5mma.tar.gz
 	@echo "Installing in " ${INSTALLDIR}
@@ -90,8 +94,16 @@ install : h5mma.tar.gz
 	@tar zxf h5mma.tar.gz -C ${INSTALLDIR}
 
 h5mmatm.cc : h5mma.tm
-	${MPREP} $? -o $@
+	@${MPREP} $? -o $@
+
+BUILD_ID :
+	@date +"%Y.%m.%d-%H.%M" > BUILD_ID
+	@echo "Build id:" `cat BUILD_ID`
+
+GIT_REVISION :
+	@git rev-parse HEAD > GIT_REVISION
+	@echo "Git revision:" `cat GIT_REVISION`
 
 .PHONY : clean
 clean :
-	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma h5mma.dmg h5mma.sparseimage
+	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma h5mma.dmg h5mma-*.dmg h5mma.sparseimage BUILD_ID GIT_REVISION

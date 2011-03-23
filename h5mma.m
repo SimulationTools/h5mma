@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Copyright 2010-2011 Barry Wardell and Ian Hinder
 
    This program is free software; you can redistribute it and/or modify it under
@@ -23,6 +25,7 @@ StyleBox[\"elements\", \"TI\"]\)] imports the specified elements from a file.";
 Turbo::usage = "Turbo is an option for ImportHDF5 which enables faster, but less reliable dataset listing.";
 ImportHDF5::nffil = "File not found during import.";
 ReadDatasetsProgress::usage = "ReadDatasetsProgress is a real number between 0 and 1 indicating the current progress of the function ReadDatasets";
+h5mmaVersion::usage = "h5mmaVersion[] returns version information for the h5mma package."
 
 Begin["`Private`"];
 
@@ -89,6 +92,17 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
     Throw["Error reading HDF5 data"], {LinkObject::linkd}]
 
 ];
+
+h5mmaVersion[] :=
+ Module[{h5mmapath, buildid, gitrev},
+  h5mmapath = FileNameDrop[FindFile["h5mma`"], -2];
+  buildid = First@ReadList[FileNameJoin[{h5mmapath, "BUILD_ID"}], "String"];
+  gitrev=First@ReadList[FileNameJoin[{h5mmapath, "GIT_REVISION"}],"String"];
+  Grid[{{"Installed in:", h5mmapath},
+       {"Build ID: ", buildid},
+       {"Git revision: ", gitrev}},
+    Alignment -> Left]
+]
 
 End[];
 EndPackage[];
