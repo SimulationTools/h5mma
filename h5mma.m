@@ -29,7 +29,8 @@ h5mmaVersion::usage = "h5mmaVersion[] returns version information for the h5mma 
 
 Begin["`Private`"];
 
-Install["h5mma"];
+If[Install["h5mma"] === $Failed,
+  Print["h5mma has been installed but the MathLink executable cannot be loaded. Check the README file for instructions on compiling it."]];
 
 Options[ImportHDF5] = {Turbo->False};
 
