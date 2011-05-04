@@ -46,6 +46,27 @@ Mac OSX (Fink):
 sudo apt-get install hdf5-18 szip
 make && make install
 
+Ubuntu:
+The version of HDF5 provided with Ubuntu does not currently work due to a bug
+in the package (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=537414). This
+will be fixed in the future. Until then, install HDF5 manually by downloading
+the source package from http://www.hdfgroup.org/ftp/HDF5/current/src/,
+extracting the tarball and then in the extracted directory running:
+./configure --prefix=/usr/local && make && sudo make install
+
+Now, copy the 'make.defs.example' file to 'make.defs' and edit it so that it
+has the following:
+
+HDF5DIR    = /usr/local
+MLINKDIR   = /usr/local/Wolfram/Mathematica/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux/CompilerAdditions
+INSTALLDIR = ${HOME}/.Mathematica/Applications/h5mma
+
+You may need to adjust the MLINKDIR for your system. In particular, if your
+system is 64-bit, change 'Linux' to 'Linux-x86-64'.
+
+Finally, build and install h5mma:
+make && make install
+
 Other:
 Create the file 'make.defs' using the template provided in 'make.defs.example'.
 Edit the paths in this file to point to the appropriate locations on your

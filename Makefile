@@ -1,5 +1,6 @@
 
 UNAME := $(shell uname)
+ARCH := $(shell uname -m)
 HOSTNAME := $(shell hostname)
 
 # Override any of the below paths in a make.defs file
@@ -7,19 +8,26 @@ HOSTNAME := $(shell hostname)
 
 # Damiana specific paths
 ifeq ($(HOSTNAME), login-damiana)
-MLINKDIR   ?= /cluster/MATHEMATICA/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
-HDF5DIR    ?= /cluster/hdf5/1.8.4-patch1
+  MLINKDIR   ?= /cluster/MATHEMATICA/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
+  HDF5DIR    ?= /cluster/hdf5/1.8.4-patch1
 endif
 
 ifeq ($(UNAME), Linux)
-# Linux specific paths
-INSTALLDIR ?= ${HOME}/.Mathematica/Applications/h5mma
-EXEDIR     = Linux-x86-64
+  # Linux specific paths
+  INSTALLDIR ?= ${HOME}/.Mathematica/Applications/h5mma
+  ifeq ($(ARCH), x86_64)
+    EXEDIR     = Linux-x86-64
+    MATHLIBS   = -L${MLINKDIR} -lML64i3 -lrt
+  else ifeq ($(ARCH), i686)
+    EXEDIR     = Linux
+    MATHLIBS   = -L${MLINKDIR} -lML32i3 -lrt
+  endif
 else ifeq ($(UNAME), Darwin)
   # Mac OSX specific paths
   MLINKDIR   ?= /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions
   INSTALLDIR ?= ${HOME}/Library/Mathematica/Applications/h5mma
   EXEDIR     = MacOSX-x86-64
+  MATHLIBS   = -F$(MLINKDIR) -framework mathlink
   ifneq ($(wildcard /opt/local/lib/libhdf5.dylib),)
     # MacPorts
     HDF5DIR    ?= /opt/local
@@ -40,11 +48,15 @@ PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 READ
 all : h5mma
 
 h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
+	@echo "Compiling h5mma"
 	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
-	${MCC} $(CFLAGS) $(INCLUDES) h5mma.cc h5mmatm.cc h5wrapper.cc $(LDFLAGS) -lhdf5 -xo h5mma
-	@cp -R h5mma/* ./
-	@rm -r h5mma
+	@rm -rf $(EXEDIR)
+	@mkdir $(EXEDIR)
+	@g++ $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
+	@g++ $(CFLAGS) $(INCLUDES) -c h5mma.cc
+	@g++ $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
+	@g++ $(LDFLAGS) h5mma.o h5mmatm.o h5wrapper.o -lhdf5 $(MATHLIBS) -o $(EXEDIR)/h5mma
 
 h5mma-osx-hdf5static : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
 	@echo "Compiling h5mma statically"
