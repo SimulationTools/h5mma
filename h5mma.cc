@@ -248,10 +248,22 @@ void ReadDatasets(const char *fileName)
         break;
       case H5T_FLOAT:
         {
-          double fdata[nElems];
+          double *fdata = 0;
+          try
+          {
+            fdata = new double[nElems];
+          }
+          catch(bad_alloc e)
+          {
+            throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+          }
           if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+          {
+            delete [] fdata;
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+          }
           MLPutRealArray(loopback, fdata, dims, NULL, rank);
+          delete [] fdata;
         }
         break;
       default:
