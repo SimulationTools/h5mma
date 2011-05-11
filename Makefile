@@ -56,7 +56,10 @@ h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
 	@g++ $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
 	@g++ $(CFLAGS) $(INCLUDES) -c h5mma.cc
 	@g++ $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
-	@g++ $(LDFLAGS) h5mma.o h5mmatm.o h5wrapper.o -lhdf5 $(MATHLIBS) -o $(EXEDIR)/h5mma
+	@g++ h5mma.o h5mmatm.o h5wrapper.o $(LDFLAGS) -lhdf5 $(MATHLIBS) -o $(EXEDIR)/h5mma
+ifeq ($(UNAME), Darwin)
+	@install_name_tool -change @executable_path/../Frameworks/mathlink.framework/Versions/3.16/mathlink $(MLINKDIR)/mathlink.framework/mathlink MacOSX-x86-64/h5mma
+endif
 
 h5mma-osx-hdf5static : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
 	@echo "Compiling h5mma statically"
