@@ -6,3 +6,5 @@ h5mma.creator
 h5mma.creator.user
 h5mma.files
 h5mma.includes
+BUILD_ID
+GIT_REVISION
