@@ -37,6 +37,7 @@ class H5Base
 {
 public:
   hid_t getId() const;
+  virtual ~H5Base() { };
 
 protected:
   hid_t id;
