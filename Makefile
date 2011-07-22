@@ -18,11 +18,14 @@ ifeq ($(UNAME), Linux)
   ifeq ($(ARCH), x86_64)
     EXEDIR     = Linux-x86-64
     MATHLIBS   = -L${MLINKDIR} -lML64i3 -lrt
-  else ifeq ($(ARCH), i686)
+  else
+  ifeq ($(ARCH), i686)
     EXEDIR     = Linux
     MATHLIBS   = -L${MLINKDIR} -lML32i3 -lrt
   endif
-else ifeq ($(UNAME), Darwin)
+  endif
+else
+ifeq ($(UNAME), Darwin)
   # Mac OSX specific paths
   MLINKDIR   ?= /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions
   INSTALLDIR ?= ${HOME}/Library/Mathematica/Applications/h5mma
@@ -31,9 +34,12 @@ else ifeq ($(UNAME), Darwin)
   ifneq ($(wildcard /opt/local/lib/libhdf5.dylib),)
     # MacPorts
     HDF5DIR    ?= /opt/local
-  else ifneq ($(wildcard /sw/lib/libhdf5.dylib),)
+  else
+  ifneq ($(wildcard /sw/lib/libhdf5.dylib),)
     # Fink
     HDF5DIR    ?= /sw
+  endif
+  endif
 endif
 endif
 
