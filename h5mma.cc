@@ -21,22 +21,10 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
-#include "h5wrapper.h"
-#include "mathlink.h" 
+#include "h5mma.h"
 #include "time.h"
 
 using namespace std;
-
-#define FAIL_ML       1
-#define FAIL_HDF5     2
-#define FAIL_INVALID  3
-
-extern "C"
-{
-  herr_t put_dataset_name(hid_t o_id, const char *name, const H5O_info_t *object_info, void *op_data);
-  herr_t put_dataset_name_fast(hid_t loc_id, const char *name, const H5L_info_t*, void *opdata);
-  herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, void *op_data);
-}
 
 void fail(int type, const char *err)
 {
@@ -356,19 +344,6 @@ void ReadDatasetNames(const char *fileName)
 
   return;
 }
-
-class DatasetNames
-{
-public:
-  DatasetNames()
-  {
-    num_links = 0;
-    last_progress = 0.0;
-  }
-  vector<string> datasetNames;
-  int num_links;
-  double last_progress;
-};
 
 void ReadDatasetNamesFast(const char *fileName)
 {
