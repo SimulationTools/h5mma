@@ -57,8 +57,8 @@ all : h5mma
 
 h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
 	@echo "Compiling h5mma"
-	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
-	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d "$(HDF5DIR)" ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d "$(MLINKDIR)" ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@rm -rf $(EXEDIR)
 	@mkdir $(EXEDIR)
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
@@ -71,8 +71,8 @@ endif
 
 h5mma-osx-hdf5static : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
 	@echo "Compiling h5mma statically"
-	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
-	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d "$(HDF5DIR)" ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d "$(MLINKDIR)" ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@rm -rf MacOSX-x86-64
 	@mkdir MacOSX-x86-64
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
@@ -83,8 +83,8 @@ h5mma-osx-hdf5static : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT
 
 h5mma-osx-hdf5mmastatic : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
 	@echo "Compiling h5mma statically (including MathLink)"
-	@if [ ! -d $(HDF5DIR) ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
-	@if [ ! -d $(MLINKDIR) ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d "$(HDF5DIR)" ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d "$(MLINKDIR)" ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@rm -rf MacOSX-x86-64
 	@mkdir MacOSX-x86-64
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
@@ -117,6 +117,7 @@ install : h5mma.tar.gz
 	@tar zxf h5mma.tar.gz -C ${INSTALLDIR}
 
 h5mmatm.cc : h5mma.tm
+	@if [ ! -d "$(MLINKDIR)" ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
 	@${MPREP} $? -o $@
 
 BUILD_ID :
