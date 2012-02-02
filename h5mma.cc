@@ -194,6 +194,7 @@ void ReadDatasets(const char *fileName)
       /* Only accept 4 byte integers, 8 byte floats or 1 byte integers (as characters) */
       if (!((typeclass == H5T_INTEGER && size == 4) ||
             (typeclass == H5T_FLOAT && size == 8) ||
+            (typeclass == H5T_FLOAT && size == 4) ||
             (typeclass == H5T_INTEGER && size == 1) ))
       {
         throw(H5Exception("Unsupported datatype"));
@@ -213,9 +214,11 @@ void ReadDatasets(const char *fileName)
       }
 
       long int dims[rank];
+      int dims2[rank];
       for (int j = 0; j < rank; j++)
       {
         dims[j] = dims_out[j];
+        dims2[j] = dims_out[j];
       }
 
       switch(typeclass)
@@ -235,6 +238,7 @@ void ReadDatasets(const char *fileName)
         }
         break;
       case H5T_FLOAT:
+        if (size == 8)
         {
           double *fdata = 0;
           try
@@ -252,6 +256,30 @@ void ReadDatasets(const char *fileName)
           }
           MLPutRealArray(loopback, fdata, dims, NULL, rank);
           delete [] fdata;
+        }
+        else if (size == 4)
+        {
+          float *fdata = 0;
+          try
+          {
+            fdata = new float[nElems];
+          }
+          catch(bad_alloc e)
+          {
+            throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+          }
+          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+          {
+            delete [] fdata;
+            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+          }
+
+          MLPutReal32Array(loopback, fdata, dims2, NULL, rank);
+          delete [] fdata;
+        }
+        else
+        {
+          assert(0);
         }
         break;
       default:
