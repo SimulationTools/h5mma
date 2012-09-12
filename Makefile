@@ -51,7 +51,7 @@ CFLAGS   = -Wall -Wno-write-strings -O3
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
-PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 README BUILD_ID GIT_REVISION
+PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 COPYING.MATHLINK README BUILD_ID GIT_REVISION
 
 all : h5mma
 
@@ -92,16 +92,16 @@ h5mma-osx-hdf5mmastatic : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID 
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
 	@$(CXX) h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi3.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a $(HDF5DIR)/lib/libz.a -framework CoreFoundation -framework Foundation -o MacOSX-x86-64/h5mma
 
-h5mma.zip : 
+h5mma.zip : h5mma-osx-hdf5mmastatic ${PKGFILES}
 	@zip -r h5mma.zip ${PKGFILES}
 
-h5mma.tar.gz : 
+h5mma.tar.gz : h5mma-osx-hdf5mmastatic ${PKGFILES}
 	@tar -czf h5mma.tar.gz ${PKGFILES}
 
-h5mma.tar.bz2 : 
+h5mma.tar.bz2 : h5mma-osx-hdf5mmastatic ${PKGFILES}
 	@tar -cjf h5mma.tar.bz2 ${PKGFILES}
 
-h5mma.dmg : h5mma-osx-hdf5static ${PKGFILES}
+h5mma.dmg : h5mma-osx-hdf5mmastatic ${PKGFILES}
 	@echo "Creating h5mma-"`cat BUILD_ID`".dmg"
 	@rm -f h5mma.sparseimage h5mma.dmg
 	@hdiutil convert -quiet empty.dmg -format UDSP -o h5mma
