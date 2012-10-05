@@ -27,19 +27,37 @@ ImportHDF5::nffil = "File not found during import.";
 ReadDatasetsProgress::usage = "ReadDatasetsProgress is a real number between 0 and 1 indicating the current progress of the function ReadDatasets";
 h5mmaVersion::usage = "h5mmaVersion[] returns version information for the h5mma package."
 
+$h5mmaRemote;
+
 Begin["`Private`"];
 
-If[Install["h5mma"] === $Failed,
-  Print["h5mma has been installed but the MathLink executable cannot be loaded. Check the README file for instructions on compiling it."];
-  Abort[];
+Module[{installed},
+  If[ValueQ[$h5mmaRemote],
+    Module[{host, p1, p2},
+      host = $h5mmaRemote[[1]];
+      {p1, p2} = ToString /@ $h5mmaRemote[[2]];
+      installed = Install[p1 <> "@" <> host <> "," <> p2 <> "@" <> host, LinkMode -> Connect, LinkProtocol -> "TCPIP"];
+    ]
+  ,
+    installed = Install["h5mma"];
+  ];
+
+  If[installed === $Failed,
+    Print["h5mma has been installed but the MathLink executable cannot be loaded. Check the README file for instructions on compiling it."];
+    Abort[];
+  ];
 ];
 
 Options[ImportHDF5] = {Turbo->False};
 
 ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] := 
   Module[{absfile, datasets, annotations, data, dims, turbo},
-    If[FileExistsQ[file],
+    Which[
+     FileExistsQ[file],
       absfile = AbsoluteFileName[file],
+     ValueQ[$h5mmaRemote],
+      absfile = file,
+     True,
       Message[ImportHDF5::nffil];
       Return[$Failed]
     ];
