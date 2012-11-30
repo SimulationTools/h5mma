@@ -22,8 +22,11 @@ ImportHDF5::usage = "ImportHDF5[\"file\"] imports data from an HDF5 file, return
 StyleBox[\"Mathematica\",\nFontSlant->\"Italic\"]\) version of it.
 ImportHDF5[\"file\", \!\(\*
 StyleBox[\"elements\", \"TI\"]\)] imports the specified elements from a file.";
+
+ExportHDF5::usage = "ExportHDF5[\"file\", data, {\"Datasets\", ds}] exports data to an HDF5 file.";
+
 Turbo::usage = "Turbo is an option for ImportHDF5 which enables faster, but less reliable dataset listing.";
-ImportHDF5::nffil = "File not found during import.";
+h5mma::nffil = "File not found during import.";
 ReadDatasetsProgress::usage = "ReadDatasetsProgress is a real number between 0 and 1 indicating the current progress of the function ReadDatasets";
 h5mmaVersion::usage = "h5mmaVersion[] returns version information for the h5mma package."
 
@@ -38,7 +41,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
   Module[{absfile, datasets, annotations, data, dims, turbo},
     If[FileExistsQ[file],
       absfile = AbsoluteFileName[file],
-      Message[ImportHDF5::nffil];
+      Message[H5MMA::nffil];
       Return[$Failed]
     ];
 
@@ -91,6 +94,40 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
     ],
 
     Throw["Error reading HDF5 data"], {LinkObject::linkd}]
+
+];
+
+writeDatasets[file_String, dsNames_List, data_List] :=
+  Module[{},
+  If[Length[dsNames] != Length[data],
+    Throw["Number of datasets is not the same as the size of the data."];
+  ];
+
+  If[Not[And@@Map[ArrayQ, data]],
+    Throw["Not all datasets are arrays"];
+  ];
+
+  WriteDatasets[file, Thread[dsNames -> data]];
+]
+
+ExportHDF5[file_String, expr_, elements_:{"Datasets", {"Dataset"}}, OptionsPattern[]] :=
+  Module[{absfile, datasets, annotations, data, dims, turbo},
+    absfile = ExpandFileName[file];
+
+    Check[
+
+    Switch[elements,
+      {"Datasets", _List},
+      writeDatasets[absfile, elements[[2]], expr],
+
+      {"Datasets", _String},
+      writeDatasets[absfile, {elements[[2]]}, {expr}],
+
+      _,
+      $Failed
+    ],
+
+    Throw["Error writing HDF5 data"], {LinkObject::linkd}]
 
 ];
 

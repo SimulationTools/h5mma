@@ -356,7 +356,7 @@ void ReadDatasetNamesFast(const char *fileName)
   DatasetNames dns;
   dns.num_links = num_links;
 
-  herr_t err = H5Literate_by_name(file.getId(), "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL, 
+  herr_t err = H5Literate_by_name(file.getId(), "/", H5_INDEX_NAME, H5_ITER_NATIVE, NULL,
                                   put_dataset_name_fast, &dns, H5P_DEFAULT);
 
   if (err < 0)
@@ -463,7 +463,145 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
   return 0;
 }
 
-int main(int argc, char* argv[]) 
+void WriteDatasets(const char *fileName)
 {
-  return MLMain(argc, argv); 
-} 
+  long n;
+
+  if(MLCheckFunction(stdlink, "List", &n)!=MLSUCCESS)
+  {
+      fail(FAIL_INVALID, NULL);
+      return;
+  }
+
+  /* Loop over all requested datasets */
+  for(int i=0; i<n; i++)
+  {
+    if(MLAbort)
+    {
+      MLPutFunction(stdlink, "Abort", 0);
+      return;
+    }
+
+    if(MLCheckFunction(stdlink, "Rule", NULL) != MLSUCCESS)
+    {
+      fail(FAIL_INVALID, NULL);
+      return;
+    }
+
+    /* Get the name of the dataset */
+    const char *datasetName;
+    if(!MLGetString(stdlink, &datasetName))
+    {
+      fail(FAIL_ML, NULL);
+      return;
+    }
+
+    /* Get the data from Mathematica */
+    double *data;
+    long *dims;
+    char **heads;
+    long rank;
+    MLGetRealArray(stdlink, &data, &dims, &heads, &rank);
+
+    MLReleaseString(stdlink, datasetName);
+    MLDisownRealArray(stdlink, data, dims, heads, rank);
+  }
+
+//   try
+//   {
+    //H5F file(fileName);
+
+
+
+
+
+      /* Respond to abort from Mathematica */
+
+
+
+//       H5D dataset(file, datasetNames[i]);
+//
+//       /* Check we have 64 bit floating point numbers */
+//       H5T datatype(dataset);
+//       H5T_class_t typeclass = H5Tget_class(datatype.getId());
+//       size_t size = datatype.getSize();
+//
+//       /* Only accept 4 byte integers, 8 byte floats or 1 byte integers (as characters) */
+//       if (!((typeclass == H5T_INTEGER && size == 4) ||
+//             (typeclass == H5T_FLOAT && size == 8) ||
+//             (typeclass == H5T_INTEGER && size == 1) ))
+//       {
+//         throw(H5Exception("Unsupported datatype"));
+//       }
+//
+//       /* Get dimensions of this dataset */
+//       H5S dataspace(dataset);
+//       const int rank = dataspace.getSimpleExtentNDims();
+//       hsize_t dims_out[rank];
+//       dataspace.getSimpleExtentDims(dims_out);
+//
+//       /* Read data */
+//       int nElems = 1;
+//       for (int j = 0; j < rank; j++)
+//       {
+//         nElems *= dims_out[j];
+//       }
+//
+//       long int dims[rank];
+//       for (int j = 0; j < rank; j++)
+//       {
+//         dims[j] = dims_out[j];
+//       }
+//
+//       switch(typeclass)
+//       {
+//       case H5T_INTEGER:
+//         if(size == 4)
+//         {
+//           int idata[nElems];
+//           MLGetIntegerArray(stdlink, idata, dims, 0, rank);
+//           if (H5Dwrite(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata) < 0)
+//             throw(H5Exception("Failed to write data for dataset " + datasetNames[i]));
+//         } else if(size==1) {
+//           char cdata[nElems];
+//           MLGetString(stdlink, cdata);
+//           if (H5Dwrite(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata) < 0)
+//             throw(H5Exception("Failed to write data for dataset " + datasetNames[i]));
+//         }
+//         break;
+//       case H5T_FLOAT:
+//         {
+//           double *fdata = 0;
+//           try
+//           {
+//             fdata = new double[nElems];
+//           }
+//           catch(bad_alloc e)
+//           {
+//             throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+//           }
+//           MLGetRealArray(stdlink, fdata, dims, NULL, rank);
+//           if (H5Dwrite(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+//           {
+//             delete [] fdata;
+//             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+//           }
+//           delete [] fdata;
+//         }
+//         break;
+//       default:
+//         throw(H5Exception("Data format not supported"));
+//       }
+//
+//     }
+//   }
+//   catch(H5Exception err) {
+//     fail(FAIL_HDF5, err.getCMessage());
+//     return;
+//   }
+}
+
+int main(int argc, char* argv[])
+{
+  return MLMain(argc, argv);
+}

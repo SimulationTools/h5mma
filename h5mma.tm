@@ -43,5 +43,14 @@
 :ReturnType:     Manual
 :End: 
 
+:Begin:
+:Function:       WriteDatasets
+:Pattern:        WriteDatasets[fileName_String, rules:{__List}]
+:Arguments:      { fileName, rules }
+:ArgumentTypes:  { String, Manual }
+:ReturnType:     Manual
+:End:
+
+
 :Evaluate: End[]
 :Evaluate: EndPackage[]
