@@ -68,9 +68,12 @@ Finally, build and install h5mma:
 make && make install
 
 Other:
-Create the file 'make.defs' using the template provided in 'make.defs.example'.
-Edit the paths in this file to point to the appropriate locations on your
-machine:
+
+Create the file 'make.defs' using the template provided in
+'make.defs.example' (this is not necessary on
+login-damiana.aei.mpg.de, since that machine is configured
+automatically).  Edit the paths in this file to point to the
+appropriate locations on your machine:
 
 HDF5DIR:    This should be the directory containing lib/libhdf5*.
 MLINKDIR:   This should be the directory containing mcc and mprep.
@@ -80,8 +83,12 @@ INSTALLDIR: This is optional and can be used to override the directory where
             (${HOME}/Library/Mathematica/Applications/h5mma) so this will not
             normally need to be set.
 
-Once these paths have been set, build and install h5mma:
-make && make install
+Once these paths have been set, build h5mma:
+
+     make
+
+and install it by copying/moving/symlinking the h5mma directory into
+$HOME/.Mathematica/Applications so that Mathematica can find it.
 
 Usage
 -----
