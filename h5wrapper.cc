@@ -115,6 +115,11 @@ H5T::H5T(const H5D& ds)
   id = H5Dget_type(ds.getId());
   if( id<0 )
     throw H5Exception("H5Dget_type failed");
+
+  native_id = H5Tget_native_type(id, H5T_DIR_ASCEND);
+  if( native_id<0 )
+    throw H5Exception("H5Tget_native_type failed");
+
 }
 
 H5T::H5T(const H5A& attr)
@@ -122,17 +127,28 @@ H5T::H5T(const H5A& attr)
   id = H5Aget_type(attr.getId());
   if( id<0 )
     throw H5Exception("H5Aget_type failed");
+
+  native_id = H5Tget_native_type(id, H5T_DIR_ASCEND);
+  if( native_id<0 )
+    throw H5Exception("H5Tget_native_type failed");
 }
 
 H5T::~H5T()
 {
   if( H5Tclose(id)<0 )
     throw H5Exception("H5Tclose failed");
+  if( H5Tclose(native_id)<0 )
+    throw H5Exception("H5Tclose failed");
 }
 
 size_t H5T::getSize() const
 {
   return H5Tget_size(id);
+}
+
+hid_t H5T::getNativeId() const
+{
+  return native_id;
 }
 
 /* H5A wrapper */
