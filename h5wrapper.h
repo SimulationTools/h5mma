@@ -85,6 +85,9 @@ public:
   ~H5T();
 
   size_t getSize() const;
+  hid_t  getNativeId() const;
+private:
+  hid_t native_id;
 };
 
 

@@ -227,12 +227,12 @@ void ReadDatasets(const char *fileName)
         if(size == 4)
         {
           int idata[nElems];
-          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata) < 0)
+          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata) < 0)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
           MLPutIntegerArray(loopback, idata, dims, 0, rank);
         } else if(size==1) {
           char cdata[nElems];
-          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata) < 0)
+          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata) < 0)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
           MLPutString(loopback, cdata);
         }
@@ -249,7 +249,7 @@ void ReadDatasets(const char *fileName)
           {
             throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
           }
-          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
           {
             delete [] fdata;
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
@@ -466,7 +466,7 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
     }
 
     char* values = new char[nElems*size];
-    if(H5Aread(attr.getId(), datatype.getId(), (void *)values)<0)
+    if(H5Aread(attr.getId(), datatype.getNativeId(), (void *)values)<0)
       throw(H5Exception("Failed to read data for attribute"));
 
     if (typeclass == H5T_INTEGER)
@@ -479,7 +479,7 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
   else if (typeclass == H5T_STRING)
   {
     char str[size];
-    if(H5Aread(attr.getId(), datatype.getId(), (void *)str)<0)
+    if(H5Aread(attr.getId(), datatype.getNativeId(), (void *)str)<0)
       throw(H5Exception("Failed to read data for attribute"));
     MLPutString(loopback, str);
   }
