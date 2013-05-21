@@ -52,6 +52,8 @@ MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
 PKGFILES = ${EXEDIR} h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 COPYING.MATHLINK README BUILD_ID GIT_REVISION
+ALLPKGFILES = MacOSX-x86-64/h5mma Linux-x86-64/h5mma h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 COPYING.MATHLINK README BUILD_ID GIT_REVISION
+
 
 all : h5mma
 
@@ -121,6 +123,9 @@ h5mma.dmg : h5mma-osx-hdf5mmastatic ${PKGFILES}
 	@hdiutil eject -quiet /Volumes/h5mma
 	@hdiutil convert -quiet h5mma.sparseimage -format UDBZ -o h5mma.dmg
 	@mv h5mma.dmg h5mma-`cat BUILD_ID`.dmg
+
+tarball:  ${ALLPKGFILES}
+	tar -czf h5mma.tar.gz ${ALLPKGFILES}
 
 install : h5mma.tar.gz
 	@echo "Installing in " ${INSTALLDIR}
