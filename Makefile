@@ -92,6 +92,17 @@ h5mma-osx-hdf5mmastatic : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID 
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
 	@$(CXX) h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi3.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a $(HDF5DIR)/lib/libz.a -framework CoreFoundation -framework Foundation -o MacOSX-x86-64/h5mma
 
+h5mma-linux-hdf5mmastatic : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID GIT_REVISION
+	@echo "Compiling h5mma statically (including MathLink)"
+	@if [ ! -d "$(HDF5DIR)" ]; then echo "HDF5 not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@if [ ! -d "$(MLINKDIR)" ]; then echo "MathLink not found - create or check make.defs file"; echo "See make.defs.example file for reference"; exit 1; fi
+	@rm -rf Linux-x86-64
+	@mkdir Linux-x86-64
+	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5wrapper.cc
+	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mma.cc
+	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
+	@$(CXX) -static -pthread h5mma.o h5mmatm.o h5wrapper.o -L${HDF5DIR}/lib -lhdf5 $(MATHLIBS) -lz -ldl -o Linux-x86-64/h5mma
+
 h5mma.zip : h5mma-osx-hdf5mmastatic ${PKGFILES}
 	@zip -r h5mma.zip ${PKGFILES}
 
