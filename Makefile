@@ -125,7 +125,10 @@ h5mma.dmg : h5mma-osx-hdf5mmastatic ${PKGFILES}
 	@mv h5mma.dmg h5mma-`cat BUILD_ID`.dmg
 
 tarball:  ${ALLPKGFILES}
-	tar -czf h5mma.tar.gz ${ALLPKGFILES}
+	mkdir h5mma
+	cp -a --parents ${ALLPKGFILES} h5mma/
+	tar -czf h5mma.tar.gz h5mma
+	rm -rf h5mma
 
 install : h5mma.tar.gz
 	@echo "Installing in " ${INSTALLDIR}
