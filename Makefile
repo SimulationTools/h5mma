@@ -90,4 +90,4 @@ GIT_REVISION :
 
 .PHONY : clean
 clean :
-	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma BUILD_ID GIT_REVISION
+	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 Linux h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma BUILD_ID GIT_REVISION
