@@ -25,7 +25,13 @@ StyleBox[\"elements\", \"TI\"]\)] imports the specified elements from a file.";
 Turbo::usage = "Turbo is an option for ImportHDF5 which enables faster, but less reliable dataset listing.";
 ImportHDF5::nffil = "File not found during import.";
 ReadDatasetsProgress::usage = "ReadDatasetsProgress is a real number between 0 and 1 indicating the current progress of the function ReadDatasets";
-h5mmaVersion::usage = "h5mmaVersion[] returns version information for the h5mma package."
+
+$h5mmaInformation::usage = "$h5mmaInformation is a list of rules that gives information about the version of h5mma you are running.";
+$h5mmaInstallationDirectory::usage = "$h5mmaInstallationDirectory gives the top-level directory in which h5mma is installed.";
+
+$h5mmaVersionNumber::usage = "$h5mmaVersionNumber is a real number which gives the current h5mma version number.";
+$h5mmaReleaseNumber::usage = "$h5mmaReleaseNumber is an integer which gives the current h5mma release number.";
+$h5mmaVersion::usage = "$h5mmaVersionNumber is a string that gives the version of h5mma you are running.";
 
 $h5mmaRemote;
 
@@ -114,16 +120,42 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
 
 ];
 
-h5mmaVersion[] :=
- Module[{h5mmapath, buildid, gitrev},
-  h5mmapath = FileNameDrop[FindFile["h5mma`"], -2];
-  buildid = First@ReadList[FileNameJoin[{h5mmapath, "BUILD_ID"}], "String"];
-  gitrev=First@ReadList[FileNameJoin[{h5mmapath, "GIT_REVISION"}],"String"];
-  Grid[{{"Installed in:", h5mmapath},
-       {"Build ID: ", buildid},
-       {"Git revision: ", gitrev}},
-    Alignment -> Left]
+
+$h5mmaInstallationDirectory = FileNameDrop[FindFile["h5mma`"], -2];
+
+$h5mmaVersionNumber        = 1.0;
+$h5mmaReleaseNumber        = 0;
+
+$h5mmaVersion :=
+ Module[{path, version, release, buildid, gitrev},
+  path = $h5mmaInstallationDirectory;
+  version = ToString[NumberForm[$h5mmaVersionNumber, {Infinity, 1}]];
+  release = ToString[$h5mmaReleaseNumber];
+
+  buildid = Quiet@ReadList[FileNameJoin[{path, "BUILD_ID"}], "String"];
+  If[SameQ[buildid, $Failed],
+    buildid = "";
+  ,
+    buildid = " (" <> First[buildid] <> ")";
+  ];
+
+  gitrev = Quiet@ReadList[FileNameJoin[{path, "GIT_REVISION"}],"String"];
+  If[SameQ[gitrev, $Failed],
+    gitrev = Quiet@First@ReadList["!git --git-dir "<>FileNameJoin[{path, ".git"}]<>" rev-parse HEAD", String];
+  ,
+    gitrev = First[gitrev];
+  ];
+
+  If[!StringQ[gitrev], gitrev = "", gitrev = " (" <> gitrev <> ")"];
+
+  version <> "." <> release <> buildid <> gitrev
 ]
+
+$h5mmaInformation :=
+  {"InstallationDirectory" -> $h5mmaInstallationDirectory,
+   "Version" -> $h5mmaVersion,
+   "VersionNumber" -> $h5mmaVersionNumber,
+   "ReleaseNumber" -> $h5mmaReleaseNumber}
 
 End[];
 EndPackage[];
