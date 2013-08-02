@@ -1,8 +1,8 @@
 ===============================================================================
  h5mma
 ===============================================================================
- Version 0.1
- Copyright 2011 Barry Wardell and Ian Hinder
+ Version 1.0.0
+ Copyright 2011-2013 Barry Wardell and Ian Hinder
 
 The h5mma package provides improved support for reading HDF5 files in
 Mathematica. It is significantly faster, more memory efficient and crash
@@ -15,12 +15,11 @@ Getting the package
 Binary versions of the h5mma package can be downloaded from the project
 webpage:
 
-http://sourceforge.net/p/h5mma
+http://bitbucket.org/simulationtools/h5mma
 
-The latest development version will always be available from the project git
-repository:
+The source is available from the project git repository:
 
-git clone git://git.code.sf.net/p/h5mma/code h5mma
+git clone https://bitbucket.org/simulationtools/h5mma
 
 
 Requirements
@@ -34,65 +33,21 @@ HDF5: A version of the HDF5 library providing the version 1.8 API is required
 
 Installation
 ------------
-Mac OSX 10.6 (Binary):
-Double-click the dmg fie. Drag the h5mma folder to "Mathematica Applications".
-This will install h5mma in /Library/Mathematica/Applications.
+The most straightforward way to install h5mma is using the binary packages
+provided at
 
-Mac OSX (MacPorts):
-sudo port install hdf5-18
-make && make install
+http://bitbucket.org/simulationtools/h5mma/downloads
 
-Mac OSX (Fink):
-sudo apt-get install hdf5-18 szip
-make && make install
+Once you have downloaded a binary package, extract it into the Mathematica
+Applications directory:
 
-Ubuntu:
-The version of HDF5 provided with Ubuntu does not currently work due to a bug
-in the package (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=537414). This
-will be fixed in the future. Until then, install HDF5 manually by downloading
-the source package from http://www.hdfgroup.org/ftp/HDF5/current/src/,
-extracting the tarball and then in the extracted directory running:
-./configure --prefix=/usr/local && make && sudo make install
+For Mac OS: $HOME/Library/Mathematica/Applications
+For Linux: $HOME/.Mathematica/Applications
 
-Now, copy the 'make.defs.example' file to 'make.defs' and edit it so that it
-has the following:
-
-HDF5DIR    = /usr/local
-MLINKDIR   = /usr/local/Wolfram/Mathematica/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux/CompilerAdditions
-INSTALLDIR = ${HOME}/.Mathematica/Applications/h5mma
-
-You may need to adjust the MLINKDIR for your system. In particular, if your
-system is 64-bit, change 'Linux' to 'Linux-x86-64'.
-
-Finally, build and install h5mma:
-make && make install
-
-Other:
-
-Create the file 'make.defs' using the template provided in
-'make.defs.example' (this is not necessary on
-login-damiana.aei.mpg.de, since that machine is configured
-automatically).  Edit the paths in this file to point to the
-appropriate locations on your machine:
-
-HDF5DIR:    This should be the directory containing lib/libhdf5*.
-MLINKDIR:   This should be the directory containing mcc and mprep.
-INSTALLDIR: This is optional and can be used to override the directory where
-            h5mma will be installed. Sensible defaults are chosen on Linux
-            (${HOME}/.Mathematica/Applications/h5mma) and Mac OSX
-            (${HOME}/Library/Mathematica/Applications/h5mma) so this will not
-            normally need to be set.
-
-Once these paths have been set, build h5mma:
-
-     make
-
-and install it by copying/moving/symlinking the h5mma directory into
-$HOME/.Mathematica/Applications so that Mathematica can find it.
 
 Usage
 -----
-The package may then be loaded into Mathematica using the command:
+The package may be loaded into Mathematica using the command:
 
 << h5mma`
 
@@ -104,8 +59,86 @@ Examples
 For example usage, see the h5mma.nb Mathematica notebook in the doc directory.
 
 
+Compiling
+---------
+
+It should normally not be necessary to compile h5mma yourself. If you find you
+do need to do so, the following instructions should help.
+
+Mac OSX (MacPorts):
+
+First install the required HDF5 library:
+  
+  sudo port install hdf5-18
+
+Then compile h5mma:
+
+  cd $HOME/Library/Mathematica/Applications
+  git clone https://bitbucket.org/simulationtools/h5mma
+  cd h5mma
+  make
+
+
+Mac OSX (Fink):
+
+First install the required HDF5 library:
+  
+  sudo apt-get install hdf5-18 szip
+
+Then compile h5mma:
+
+  cd $HOME/Library/Mathematica/Applications
+  git clone https://bitbucket.org/simulationtools/h5mma
+  cd h5mma
+  make
+
+
+Ubuntu:
+The version of HDF5 provided with Ubuntu does not currently work due to a bug
+in the package (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=537414). This
+will be fixed in the future. Until then, install HDF5 manually by downloading
+the source package from http://www.hdfgroup.org/ftp/HDF5/current/src/,
+extracting the tarball and then in the extracted directory running:
+./configure --prefix=/usr/local && make && sudo make install
+
+Now, get a copy of the h5mma repository:
+
+  cd $HOME/Library/Mathematica/Applications
+  git clone https://bitbucket.org/simulationtools/h5mma
+  cd h5mma
+
+then copy the 'make.defs.example' file to 'make.defs' and edit it so that it
+has the following:
+
+HDF5DIR    = /usr/local
+MLINKDIR   = /usr/local/Wolfram/Mathematica/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux/CompilerAdditions
+
+You may need to adjust the MLINKDIR for your system. In particular, if your
+system is 64-bit, change 'Linux' to 'Linux-x86-64'.
+
+Finally, build h5mma:
+
+  make
+
+
+Other:
+
+Create the file 'make.defs' using the template provided in
+'make.defs.example' (this is not necessary on
+login-damiana.aei.mpg.de, since that machine is configured
+automatically).  Edit the paths in this file to point to the
+appropriate locations on your machine:
+
+HDF5DIR:    This should be the directory containing lib/libhdf5*.
+MLINKDIR:   This should be the directory containing mcc and mprep.
+
+Once these paths have been set, build h5mma:
+
+  make
+
 Changelog
 ---------
+ 2  Aug  2013: Version 1.0.0 released.
  23 Mar  2011: Binary version for Mac OSX released.
  4  Mar  2011: Initial version (0.1) released.
 
