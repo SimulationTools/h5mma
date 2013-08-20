@@ -124,17 +124,17 @@ void ReadDatasetDimensions(const char *fileName)
       const int rank = dataspace.getSimpleExtentNDims();
 
       /*  Get the size of each dimension */
-      hsize_t dims_out[rank];
-      dataspace.getSimpleExtentDims(dims_out);
+      vector<hsize_t> dims_out(rank);
+      dataspace.getSimpleExtentDims(dims_out.data());
 
-      int dims[rank];
+      vector<int> dims(rank);
       for (int j = 0; j < rank; j++)
       {
         dims[j] = dims_out[j];
       }
 
       /* Send the dimensions of this dataset to the loopback link */
-      MLPutIntegerList(loopback, dims, rank);
+      MLPutIntegerList(loopback, dims.data(), rank);
     }
   }
   catch(H5Exception err) {
@@ -203,8 +203,8 @@ void ReadDatasets(const char *fileName)
       /* Get dimensions of this dataset */
       H5S dataspace(dataset);
       const int rank = dataspace.getSimpleExtentNDims();
-      hsize_t dims_out[rank];
-      dataspace.getSimpleExtentDims(dims_out);
+      vector<hsize_t> dims_out(rank);
+      dataspace.getSimpleExtentDims(dims_out.data());
 
       /* Read data */
       int nElems = 1;
@@ -213,8 +213,8 @@ void ReadDatasets(const char *fileName)
         nElems *= dims_out[j];
       }
 
-      long int dims[rank];
-      int dims2[rank];
+      vector<long int> dims(rank);
+      vector<int> dims2(rank);
       for (int j = 0; j < rank; j++)
       {
         dims[j] = dims_out[j];
@@ -226,15 +226,15 @@ void ReadDatasets(const char *fileName)
       case H5T_INTEGER:
         if(size == 4)
         {
-          int idata[nElems];
-          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata) < 0)
+          vector<int> idata(nElems);
+          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata.data()) < 0)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-          MLPutIntegerArray(loopback, idata, dims, 0, rank);
+          MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
         } else if(size==1) {
-          char cdata[nElems];
-          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata) < 0)
+          vector<char> cdata(nElems);
+          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata.data()) < 0)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-          MLPutString(loopback, cdata);
+          MLPutString(loopback, cdata.data());
         }
         break;
       case H5T_FLOAT:
@@ -254,7 +254,7 @@ void ReadDatasets(const char *fileName)
             delete [] fdata;
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
           }
-          MLPutRealArray(loopback, fdata, dims, NULL, rank);
+          MLPutRealArray(loopback, fdata, dims.data(), NULL, rank);
           delete [] fdata;
         }
         else if (size == 4)
@@ -274,7 +274,7 @@ void ReadDatasets(const char *fileName)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
           }
 
-          MLPutReal32Array(loopback, fdata, dims2, NULL, rank);
+          MLPutReal32Array(loopback, fdata, dims2.data(), NULL, rank);
           delete [] fdata;
         }
         else
@@ -451,15 +451,15 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
   {
     H5S dataspace(attr);
     const int rank = dataspace.getSimpleExtentNDims();
-    hsize_t dims[rank];
-    dataspace.getSimpleExtentDims(dims);
+    vector<hsize_t> dims(rank);
+    dataspace.getSimpleExtentDims(dims.data());
     int nElems = 1;
     for (int k = 0; k < rank; k++)
     {
       nElems *= dims[k];
     }
 
-    long int idims[rank];
+    vector<long int> idims(rank);
     for (int k = 0; k < rank; k++)
     {
       idims[k] = dims[k];
@@ -470,18 +470,18 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
       throw(H5Exception("Failed to read data for attribute"));
 
     if (typeclass == H5T_INTEGER)
-      MLPutIntegerArray(loopback,(int *) values, idims, 0, rank);
+      MLPutIntegerArray(loopback,(int *) values, idims.data(), 0, rank);
     else if (typeclass == H5T_FLOAT)
-      MLPutRealArray(loopback,(double *) values, idims, 0, rank);
+      MLPutRealArray(loopback,(double *) values, idims.data(), 0, rank);
 
     delete[] values;
   }
   else if (typeclass == H5T_STRING)
   {
-    char str[size];
-    if(H5Aread(attr.getId(), datatype.getNativeId(), (void *)str)<0)
+    vector<char> str(size);
+    if(H5Aread(attr.getId(), datatype.getNativeId(), (void *)str.data())<0)
       throw(H5Exception("Failed to read data for attribute"));
-    MLPutString(loopback, str);
+    MLPutString(loopback, str.data());
   }
   else
   {
