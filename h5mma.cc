@@ -21,10 +21,14 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
+#include <cmath>
+
 #include "h5mma.h"
 #include "time.h"
 
 using namespace std;
+
+static int put_general_array(MLINK link, const double *fdata, long int dims[], int rank);
 
 void fail(int type, const char *err)
 {
@@ -254,7 +258,22 @@ void ReadDatasets(const char *fileName)
             delete [] fdata;
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
           }
-          MLPutRealArray(loopback, fdata, dims, NULL, rank);
+
+          bool numeric = true;
+          for (int i = 0; i < nElems; i++)
+          {
+            numeric &= std::isfinite(fdata[i]);
+          }
+
+          if (numeric)
+          {
+            MLPutRealArray(loopback, fdata, dims, NULL, rank);
+          }
+          else
+          {
+            put_general_array(loopback, fdata, dims, rank);
+          }
+
           delete [] fdata;
         }
         else if (size == 4)
@@ -488,6 +507,50 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
     MLPutSymbol(loopback, "Null");
   }
 
+  return 0;
+}
+
+// Output a list of lists representing the array of doubles.  
+static int put_general_array(MLINK link, const double *fdata, long int dims[], int rank)
+{
+  int npoints = 1;
+  for (int i = 0; i < rank; i++)
+  {
+    npoints *= dims[i];
+  }
+
+  if (rank == 1)
+  {
+    MLPutFunction(link, "List", dims[0]);
+    for (int i = 0; i < dims[0]; i++)
+    {
+      if (std::isfinite(fdata[i]))
+      {
+        MLPutReal(link, fdata[i]);
+      }
+      else if (std::isnan(fdata[i]))
+      {
+        MLPutSymbol(link, "Indeterminate");
+      }
+      else if (std::isinf(fdata[i]))
+      {
+        MLPutSymbol(link, "ComplexInfinity");
+      }
+      else
+      {
+        // Not sure what to do here.  Can this happen?
+        MLPutSymbol(link, "Unknown");
+      }
+    }
+  }
+  else
+  {
+    MLPutFunction(link, "List", dims[0]);
+    for (int i = 0; i < dims[0]; i++)
+    {
+      put_general_array(link, fdata+i*npoints/dims[0], dims+1, rank-1);
+    }
+  }
   return 0;
 }
 
