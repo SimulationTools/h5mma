@@ -28,6 +28,12 @@
 
 using namespace std;
 
+#if defined(_MSC_VER)
+#define isnan(x) _isnan(x)
+#define isfinite(x) _finite(x)
+#define isinf(x) (!_finite(x) && !_isnan(x))
+#endif
+
 static int put_general_array(MLINK link, const double *fdata, long int dims[], int rank);
 
 void fail(int type, const char *err)
@@ -262,7 +268,7 @@ void ReadDatasets(const char *fileName)
           bool numeric = true;
           for (int i = 0; i < nElems; i++)
           {
-            numeric &= std::isfinite(fdata[i]);
+            numeric &= isfinite(fdata[i]);
           }
 
           if (numeric)
@@ -524,15 +530,15 @@ static int put_general_array(MLINK link, const double *fdata, long int dims[], i
     MLPutFunction(link, "List", dims[0]);
     for (int i = 0; i < dims[0]; i++)
     {
-      if (std::isfinite(fdata[i]))
+      if (isfinite(fdata[i]))
       {
         MLPutReal(link, fdata[i]);
       }
-      else if (std::isnan(fdata[i]))
+      else if (isnan(fdata[i]))
       {
         MLPutSymbol(link, "Indeterminate");
       }
-      else if (std::isinf(fdata[i]))
+      else if (isinf(fdata[i]))
       {
         MLPutSymbol(link, "ComplexInfinity");
       }
