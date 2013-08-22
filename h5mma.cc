@@ -554,7 +554,23 @@ static int put_general_array(MLINK link, const double *fdata, long int dims[], i
   return 0;
 }
 
-int main(int argc, char* argv[]) 
+#if WINDOWS_MATHLINK
+
+int WINAPI WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszCmdLine, int nCmdShow)
 {
-  return MLMain(argc, argv); 
-} 
+  char buff[512];
+  char FAR * buff_start = buff;
+  char FAR * argv[32];
+  char FAR * FAR * argv_end = argv + 32;
+
+  MLScanString(argv, &argv_end, &lpszCmdLine, &buff_start);
+  return MLMain((int)(argv_end - argv), argv);
+}
+
+#else
+int main(int argc, char* argv[])
+{
+  return MLMain(argc, argv);
+}
+
+#endif
