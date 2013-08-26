@@ -1,6 +1,5 @@
 (* Mathematica Test File *)
-testH5 = FileNameJoin[{DirectoryName[FindFile["h5mma`"]], "Tests", "test.h5"}];
-Print[testH5];
+testH5 = FileNameJoin[{$h5mmaInstallationDirectory, "Tests", "test.h5"}];
 data = Partition[Range[1., 2000.], 10];
 
 infdata = data;
