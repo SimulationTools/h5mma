@@ -540,7 +540,11 @@ static int put_general_array(MLINK link, const double *fdata, long int dims[], i
       }
       else if (isinf(fdata[i]))
       {
-        MLPutSymbol(link, "ComplexInfinity");
+        MLPutFunction(link, "DirectedInfinity", 1);
+        if(fdata[i]==1.0/0.0)
+          MLPutInteger(link, 1);
+        else
+          MLPutInteger(link, -1);
       }
       else
       {
