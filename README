@@ -1,7 +1,7 @@
 ===============================================================================
  h5mma
 ===============================================================================
- Version 1.0.0
+ Version 1.1.0
  Copyright 2011-2013 Barry Wardell and Ian Hinder
 
 The h5mma package provides improved support for reading HDF5 files in
@@ -135,13 +135,6 @@ MLINKDIR:   This should be the directory containing mcc and mprep.
 Once these paths have been set, build h5mma:
 
   make
-
-Changelog
----------
- 2  Aug  2013: Version 1.0.0 released.
- 23 Mar  2011: Binary version for Mac OSX released.
- 4  Mar  2011: Initial version (0.1) released.
-
 
 Known problems
 --------------
