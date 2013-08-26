@@ -22,6 +22,7 @@
 #include <sstream>
 #include <assert.h>
 #include <cmath>
+#include <limits>
 
 #include "h5mma.h"
 #include "time.h"
@@ -541,7 +542,7 @@ static int put_general_array(MLINK link, const double *fdata, long int dims[], i
       else if (isinf(fdata[i]))
       {
         MLPutFunction(link, "DirectedInfinity", 1);
-        if(fdata[i]==1.0/0.0)
+        if(fdata[i]==std::numeric_limits<double>::infinity())
           MLPutInteger(link, 1);
         else
           MLPutInteger(link, -1);
