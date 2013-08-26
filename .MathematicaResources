@@ -1,0 +1,8 @@
+Resources[
+    Version[1],
+    ExecutionBuildCommand["<<h5mma`"],
+    Paclet[
+        PacletFolder["h5mma"],
+        FunctionPaclet[False]
+    ]
+]
