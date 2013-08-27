@@ -49,7 +49,7 @@ CFLAGS   = -Wall -Wno-write-strings -O3
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
-PKGFILES = MacOSX-x86-64/h5mma Linux-x86-64/h5mma Linux/h5mma h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 COPYING.MATHLINK README BUILD_ID
+PKGFILES = MacOSX-x86-64/h5mma Linux-x86-64/h5mma Linux/h5mma Windows-x86-64/h5mma Windows/h5mma h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 COPYING.MATHLINK README BUILD_ID
 
 all : h5mma
 
@@ -80,6 +80,12 @@ tarball: ${PKGFILES}
 	tar -czf h5mma.tar.gz h5mma
 	rm -rf h5mma
 
+zip: ${PKGFILES}
+	mkdir h5mma
+	cp -a --parents ${PKGFILES} h5mma/
+	zip -r h5mma.zip h5mma
+	rm -rf h5mma
+
 BUILD_ID :
 	@date +"%B %d, %Y" > BUILD_ID
 	@echo "Build id:" `cat BUILD_ID`
@@ -90,4 +96,4 @@ GIT_REVISION :
 
 .PHONY : clean
 clean :
-	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 Linux h5mma.zip h5mma.tar.gz h5mma.tar.bz2 *.o h5mma BUILD_ID GIT_REVISION
+	@rm -rf h5mmatm.cc MacOSX-x86-64 Linux-x86-64 Linux Windows-x86-64 Windows h5mma.zip h5mma.tar.gz *.o h5mma BUILD_ID GIT_REVISION
