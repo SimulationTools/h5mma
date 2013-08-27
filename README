@@ -39,10 +39,10 @@ provided at
 http://bitbucket.org/simulationtools/h5mma/downloads
 
 Once you have downloaded a binary package, extract it into the Mathematica
-Applications directory:
+Applications directory. To find the correct location of this directory on
+your system, run the following command in Mathematica:
 
-For Mac OS: $HOME/Library/Mathematica/Applications
-For Linux: $HOME/.Mathematica/Applications
+  FileNameJoin[{$UserBaseDirectory, "Applications"}]
 
 
 Usage
@@ -63,84 +63,15 @@ Compiling
 ---------
 
 It should normally not be necessary to compile h5mma yourself. If you find you
-do need to do so, the following instructions should help.
+do need to do so, instructions can be found on the project wiki at
+http://bitbucket.org/simulationtools/h5mma/wiki
 
-Mac OSX (MacPorts):
-
-First install the required HDF5 library:
-  
-  sudo port install hdf5-18
-
-Then compile h5mma:
-
-  cd $HOME/Library/Mathematica/Applications
-  git clone https://bitbucket.org/simulationtools/h5mma
-  cd h5mma
-  make
-
-
-Mac OSX (Fink):
-
-First install the required HDF5 library:
-  
-  sudo apt-get install hdf5-18 szip
-
-Then compile h5mma:
-
-  cd $HOME/Library/Mathematica/Applications
-  git clone https://bitbucket.org/simulationtools/h5mma
-  cd h5mma
-  make
-
-
-Ubuntu:
-The version of HDF5 provided with Ubuntu does not currently work due to a bug
-in the package (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=537414). This
-will be fixed in the future. Until then, install HDF5 manually by downloading
-the source package from http://www.hdfgroup.org/ftp/HDF5/current/src/,
-extracting the tarball and then in the extracted directory running:
-./configure --prefix=/usr/local && make && sudo make install
-
-Now, get a copy of the h5mma repository:
-
-  cd $HOME/Library/Mathematica/Applications
-  git clone https://bitbucket.org/simulationtools/h5mma
-  cd h5mma
-
-then copy the 'make.defs.example' file to 'make.defs' and edit it so that it
-has the following:
-
-HDF5DIR    = /usr/local
-MLINKDIR   = /usr/local/Wolfram/Mathematica/8.0/SystemFiles/Links/MathLink/DeveloperKit/Linux/CompilerAdditions
-
-You may need to adjust the MLINKDIR for your system. In particular, if your
-system is 64-bit, change 'Linux' to 'Linux-x86-64'.
-
-Finally, build h5mma:
-
-  make
-
-
-Other:
-
-Create the file 'make.defs' using the template provided in
-'make.defs.example' (this is not necessary on
-login-damiana.aei.mpg.de, since that machine is configured
-automatically).  Edit the paths in this file to point to the
-appropriate locations on your machine:
-
-HDF5DIR:    This should be the directory containing lib/libhdf5*.
-MLINKDIR:   This should be the directory containing mcc and mprep.
-
-Once these paths have been set, build h5mma:
-
-  make
 
 Known problems
 --------------
 Known bugs are recorded in the project bug tracker:
 
-http://sourceforge.net/p/h5mma/tickets/
+http://bitbucket.org/simulationtools/h5mma/issues
 
 
 License
