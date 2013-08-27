@@ -1,4 +1,5 @@
 (* Mathematica Test File *)
+Print[$Version];
 testH5 = FileNameJoin[{$h5mmaInstallationDirectory, "Tests", "test.h5"}];
 data = Partition[Range[1., 2000.], 10];
 
