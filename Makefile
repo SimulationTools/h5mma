@@ -49,7 +49,7 @@ CFLAGS   = -Wall -Wno-write-strings -O3
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
-PKGFILES = MacOSX-x86-64/h5mma Linux-x86-64/h5mma Linux/h5mma Windows-x86-64/h5mma Windows/h5mma h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 COPYING.MATHLINK README BUILD_ID
+PKGFILES = MacOSX-x86-64/h5mma Linux-x86-64/h5mma Linux/h5mma Windows-x86-64/h5mma Windows-x86-64/*.dll Windows/h5mma Windows/*.dll h5mma.m Kernel doc COPYING COPYING.LESSER COPYING.HDF5 COPYING.MATHLINK README BUILD_ID
 
 all : h5mma
 
