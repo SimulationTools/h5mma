@@ -124,7 +124,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
 $h5mmaInstallationDirectory = FileNameDrop[FindFile["h5mma`"], -2];
 
 $h5mmaVersionNumber        = 1.1;
-$h5mmaReleaseNumber        = 0;
+$h5mmaReleaseNumber        = 1;
 
 $h5mmaVersion :=
  Module[{path, version, release, buildid, gitrev},
