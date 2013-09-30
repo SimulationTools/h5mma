@@ -1,7 +1,7 @@
 ===============================================================================
  h5mma
 ===============================================================================
- Version 1.1.0
+ Version 1.1.1
  Copyright 2011-2013 Barry Wardell and Ian Hinder
 
 The h5mma package provides improved support for reading HDF5 files in
