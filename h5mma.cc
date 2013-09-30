@@ -557,9 +557,10 @@ static int put_general_array(MLINK link, const double *fdata, long int dims[], i
   else
   {
     MLPutFunction(link, "List", dims[0]);
+    int nsubpoints = npoints/dims[0];
     for (int i = 0; i < dims[0]; i++)
     {
-      put_general_array(link, fdata+i*npoints/dims[0], dims+1, rank-1);
+      put_general_array(link, fdata+i*nsubpoints, dims+1, rank-1);
     }
   }
   return 0;
