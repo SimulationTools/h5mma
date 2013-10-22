@@ -224,106 +224,106 @@ void ReadDatasets(const char *fileName)
       {
         /* Numeric data */
 
-      /* Get dimensions of this dataset */
-      H5S dataspace(dataset);
-      const int rank = dataspace.getSimpleExtentNDims();
-      vector<hsize_t> dims_out(rank);
-      dataspace.getSimpleExtentDims(dims_out.data());
+        /* Get dimensions of this dataset */
+        H5S dataspace(dataset);
+        const int rank = dataspace.getSimpleExtentNDims();
+        vector<hsize_t> dims_out(rank);
+        dataspace.getSimpleExtentDims(dims_out.data());
 
-      /* Read data */
-      int nElems = 1;
-      for (int j = 0; j < rank; j++)
-      {
-        nElems *= dims_out[j];
-      }
-
-      vector<long int> dims(rank);
-      vector<int> dims2(rank);
-      for (int j = 0; j < rank; j++)
-      {
-        dims[j] = dims_out[j];
-        dims2[j] = dims_out[j];
-      }
-
-      switch(typeclass)
-      {
-      case H5T_INTEGER:
-        if(size == 4)
+        /* Read data */
+        int nElems = 1;
+        for (int j = 0; j < rank; j++)
         {
-          vector<int> idata(nElems);
-          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata.data()) < 0)
-            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-          MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
-        } else if(size==1) {
-          vector<char> cdata(nElems);
-          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata.data()) < 0)
-            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-          MLPutString(loopback, cdata.data());
+          nElems *= dims_out[j];
         }
-        break;
-      case H5T_FLOAT:
-        if (size == 8)
+
+        vector<long int> dims(rank);
+        vector<int> dims2(rank);
+        for (int j = 0; j < rank; j++)
         {
-          double *fdata = 0;
-          try
+          dims[j] = dims_out[j];
+          dims2[j] = dims_out[j];
+        }
+
+        switch(typeclass)
+        {
+        case H5T_INTEGER:
+          if(size == 4)
           {
-            fdata = new double[nElems];
+            vector<int> idata(nElems);
+            if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata.data()) < 0)
+              throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+            MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
+          } else if(size==1) {
+            vector<char> cdata(nElems);
+            if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata.data()) < 0)
+              throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+            MLPutString(loopback, cdata.data());
           }
-          catch(bad_alloc e)
+          break;
+        case H5T_FLOAT:
+          if (size == 8)
           {
-            throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
-          }
-          if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
-          {
+            double *fdata = 0;
+            try
+            {
+              fdata = new double[nElems];
+            }
+            catch(bad_alloc e)
+            {
+              throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+            }
+            if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+            {
+              delete [] fdata;
+              throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+            }
+
+            bool numeric = true;
+            for (int i = 0; i < nElems; i++)
+            {
+              numeric &= isfinite(fdata[i]);
+            }
+
+            if (numeric)
+            {
+              MLPutRealArray(loopback, fdata, dims.data(), NULL, rank);
+            }
+            else
+            {
+              put_general_array(loopback, fdata, dims.data(), rank);
+            }
+
             delete [] fdata;
-            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
           }
-
-          bool numeric = true;
-          for (int i = 0; i < nElems; i++)
+          else if (size == 4)
           {
-            numeric &= isfinite(fdata[i]);
-          }
+            float *fdata = 0;
+            try
+            {
+              fdata = new float[nElems];
+            }
+            catch(bad_alloc e)
+            {
+              throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+            }
+            if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+            {
+              delete [] fdata;
+              throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+            }
 
-          if (numeric)
-          {
-            MLPutRealArray(loopback, fdata, dims.data(), NULL, rank);
+            MLPutReal32Array(loopback, fdata, dims2.data(), NULL, rank);
+            delete [] fdata;
           }
           else
           {
-            put_general_array(loopback, fdata, dims.data(), rank);
+            assert(0);
           }
-
-          delete [] fdata;
+          break;
+        default:
+          throw(H5Exception("Data format not supported"));
         }
-        else if (size == 4)
-        {
-          float *fdata = 0;
-          try
-          {
-            fdata = new float[nElems];
-          }
-          catch(bad_alloc e)
-          {
-            throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
-          }
-          if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
-          {
-            delete [] fdata;
-            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-          }
-
-          MLPutReal32Array(loopback, fdata, dims2.data(), NULL, rank);
-          delete [] fdata;
-        }
-        else
-        {
-          assert(0);
-        }
-        break;
-      default:
-        throw(H5Exception("Data format not supported"));
-      }
       }
 
     }
