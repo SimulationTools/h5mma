@@ -206,10 +206,23 @@ void ReadDatasets(const char *fileName)
       if (!((typeclass == H5T_INTEGER && size == 4) ||
             (typeclass == H5T_FLOAT && size == 8) ||
             (typeclass == H5T_FLOAT && size == 4) ||
-            (typeclass == H5T_INTEGER && size == 1) ))
+            (typeclass == H5T_INTEGER && size == 1) ||
+            (typeclass == H5T_STRING)))
       {
         throw(H5Exception("Unsupported datatype"));
       }
+
+      if (typeclass == H5T_STRING)
+      {
+        int len = datatype.getSize();
+        char buffer[len];
+        if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+            throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+        MLPutString(loopback, buffer);
+      }
+      else
+      {
+        /* Numeric data */
 
       /* Get dimensions of this dataset */
       H5S dataspace(dataset);
@@ -310,6 +323,7 @@ void ReadDatasets(const char *fileName)
         break;
       default:
         throw(H5Exception("Data format not supported"));
+      }
       }
 
     }
