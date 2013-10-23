@@ -214,11 +214,11 @@ void ReadDatasets(const char *fileName)
 
       if (typeclass == H5T_STRING)
       {
-        int len = datatype.getSize();
-        char buffer[len];
-        if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+        size_t size = datatype.getSize();
+        vector<char> str(size);
+        if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)str.data()) < 0)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-        MLPutString(loopback, buffer);
+        MLPutString(loopback, str.data());
       }
       else
       {
