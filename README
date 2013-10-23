@@ -61,7 +61,6 @@ For example usage, see the h5mma.nb Mathematica notebook in the doc directory.
 
 Compiling
 ---------
-
 It should normally not be necessary to compile h5mma yourself. If you find you
 do need to do so, instructions can be found on the project wiki at
 http://bitbucket.org/simulationtools/h5mma/wiki
