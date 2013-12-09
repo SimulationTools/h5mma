@@ -215,7 +215,9 @@ void ReadDatasets(const char *fileName)
       if (typeclass == H5T_STRING)
       {
         size_t size = datatype.getSize();
-        vector<char> str(size);
+        /* Include space for a null terminator in case it isn't in the data */
+        vector<char> str(size+1);
+        str[size] = '\0';
         if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)str.data()) < 0)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
         MLPutString(loopback, str.data());
@@ -518,7 +520,9 @@ herr_t put_dataset_attribute(hid_t location_id, const char *attr_name, const H5A
   }
   else if (typeclass == H5T_STRING)
   {
-    vector<char> str(size);
+    /* Include space for a null terminator in case it isn't in the attribute */
+    vector<char> str(size+1);
+    str[size] = '\0';
     if(H5Aread(attr.getId(), datatype.getNativeId(), (void *)str.data())<0)
       throw(H5Exception("Failed to read data for attribute"));
     MLPutString(loopback, str.data());
