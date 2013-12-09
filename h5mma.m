@@ -45,10 +45,10 @@ Module[{installed},
       installed = Install[p1 <> "@" <> host <> "," <> p2 <> "@" <> host, LinkMode -> Connect, LinkProtocol -> "TCPIP"];
     ]
   ,
-    installed = Install["h5mma"];
+    installed = TimeConstrained[Install["h5mma"], 10];
   ];
 
-  If[installed === $Failed,
+  If[installed === $Failed || installed === $Aborted,
     Print["h5mma has been installed but the MathLink executable cannot be loaded. Check the README file for instructions on compiling it."];
     Abort[];
   ];
