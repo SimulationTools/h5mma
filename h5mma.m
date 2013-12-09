@@ -49,7 +49,7 @@ Module[{installed},
   ];
 
   If[installed === $Failed || installed === $Aborted,
-    Print["h5mma has been installed but the MathLink executable cannot be loaded. Check the README file for instructions on compiling it."];
+    Print["h5mma has been installed but the MathLink executable cannot be loaded. Please check the README for instructions for filing a bug report."];
     Abort[];
   ];
 ];
