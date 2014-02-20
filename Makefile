@@ -44,7 +44,6 @@ endif
 endif
 
 INCLUDES = -I${MLINKDIR} -I${HDF5DIR}/include
-LDFLAGS  = -Wl,-rpath,${MLINKDIR} -Wl,-rpath,${HDF5DIR}/lib -L${HDF5DIR}/lib
 CFLAGS   = -Wall -Wno-write-strings -O3
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
