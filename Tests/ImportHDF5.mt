@@ -1,6 +1,7 @@
 (* Mathematica Test File *)
 Print[$Version];
 testH5 = FileNameJoin[{$h5mmaInstallationDirectory, "h5mma", "Tests", "test.h5"}];
+shortintH5 = FileNameJoin[{$h5mmaInstallationDirectory, "h5mma", "Tests", "shortint.h5"}];
 data = Partition[Range[1., 2000.], 10];
 
 If[!FileExistsQ[testH5], Print["Cannot find test HDF5 file "<>ToString[testH5]]; Abort[]];
@@ -91,4 +92,17 @@ Test[
     infnandata
     ,
     TestID->"ImportHDF5 - inf and nan"
+]
+
+(****************************************************************)
+(* ImportHDF5 - short int                                       *)
+(****************************************************************)
+
+Test[
+    ImportHDF5[shortintH5, {"Datasets", "DS1"}]
+    ,
+    {{0, -1, -2, -3, -4, -5, -6}, {0, 0, 0, 0, 0, 0, 0}, {0, 1, 2, 3, 4, 
+      5, 6}, {0, 2, 4, 6, 8, 10, 12}}
+    ,
+    TestID->"ImportHDF5 - short int"
 ]
