@@ -204,6 +204,7 @@ void ReadDatasets(const char *fileName)
 
       /* Only accept 4 byte integers, 8 byte floats or 1 byte integers (as characters) */
       if (!((typeclass == H5T_INTEGER && size == 4) ||
+            (typeclass == H5T_INTEGER && size == 2) ||
             (typeclass == H5T_FLOAT && size == 8) ||
             (typeclass == H5T_FLOAT && size == 4) ||
             (typeclass == H5T_INTEGER && size == 1) ||
@@ -256,6 +257,11 @@ void ReadDatasets(const char *fileName)
             if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
             MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
+          } else if(size==2) {
+            vector<short> sdata(nElems);
+            if (H5Dread(dataset.getId(), H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, sdata.data()) < 0)
+              throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+            MLPutInteger16Array(loopback, sdata.data(), dims2.data(), 0, rank);
           } else if(size==1) {
             vector<char> cdata(nElems);
             if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata.data()) < 0)
