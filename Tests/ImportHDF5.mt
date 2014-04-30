@@ -3,6 +3,8 @@ Print[$Version];
 testH5 = FileNameJoin[{$h5mmaInstallationDirectory, "Tests", "test.h5"}];
 data = Partition[Range[1., 2000.], 10];
 
+If[!FileExistsQ[testH5], Print["Cannot find test HDF5 file "<>ToString[testH5]]; Abort[]];
+
 infdata = data;
 For[j = 0, j < 200, j++,
  Which[
