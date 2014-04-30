@@ -1,6 +1,6 @@
 (* Mathematica Test File *)
 Print[$Version];
-testH5 = FileNameJoin[{$h5mmaInstallationDirectory, "Tests", "test.h5"}];
+testH5 = FileNameJoin[{$h5mmaInstallationDirectory, "h5mma", "Tests", "test.h5"}];
 data = Partition[Range[1., 2000.], 10];
 
 If[!FileExistsQ[testH5], Print["Cannot find test HDF5 file "<>ToString[testH5]]; Abort[]];
