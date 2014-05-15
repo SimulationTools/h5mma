@@ -202,15 +202,26 @@ void ReadDatasets(const char *fileName)
       H5T_class_t typeclass = H5Tget_class(datatype.getId());
       size_t size = datatype.getSize();
 
+      H5T_class_t superclass = H5Tget_class(datatype.getSuperId());
+      size_t superSize = datatype.getSuperSize();
+
       /* Only accept 4 byte integers, 8 byte floats or 1 byte integers (as characters) */
       if (!((typeclass == H5T_INTEGER && size == 4) ||
             (typeclass == H5T_INTEGER && size == 2) ||
             (typeclass == H5T_FLOAT && size == 8) ||
             (typeclass == H5T_FLOAT && size == 4) ||
             (typeclass == H5T_INTEGER && size == 1) ||
-            (typeclass == H5T_STRING)))
+            (typeclass == H5T_STRING) ||
+            (typeclass == H5T_ARRAY && superclass == H5T_FLOAT && (size == 4 || size == 8))))
       {
-        throw(H5Exception("Unsupported datatype"));
+        stringstream ss;
+        ss << "Unsupported datatype: ";
+        if (typeclass == H5T_ARRAY)
+          ss << "Array, class " << superclass << ", size " << superSize;
+        else
+          ss << "class " << typeclass << ", size " << size;
+        string str = ss.str();
+        throw(H5Exception(str));
       }
 
       if (typeclass == H5T_STRING)
@@ -327,6 +338,88 @@ void ReadDatasets(const char *fileName)
           else
           {
             assert(0);
+          }
+          break;
+
+        case H5T_ARRAY:
+          {
+            const int array_rank = H5Tget_array_ndims(datatype.getId());
+            vector<hsize_t> array_dims(rank);
+            H5Tget_array_dims(datatype.getId(), array_dims.data());
+
+            /* Determine size of array data */
+            int nArrayElems = 1;
+            for (int j = 0; j < array_rank; j++)
+            {
+              nArrayElems *= array_dims[j];
+            }
+
+            dims.resize(rank + array_rank);
+            dims2.resize(rank + array_rank);
+            for (int j = 0; j < array_rank; j++)
+            {
+              dims[j+rank] = array_dims[j];
+              dims2[j+rank] = array_dims[j];
+            }
+
+            if (superSize == 8)
+            {
+              double *fdata = 0;
+              try
+              {
+                fdata = new double[nElems*nArrayElems];
+              }
+              catch(bad_alloc e)
+              {
+                throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+              }
+              if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+              {
+                delete [] fdata;
+                throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+              }
+
+              bool numeric = true;
+              for (int i = 0; i < nElems*nArrayElems; i++)
+              {
+                numeric &= isfinite(fdata[i]);
+              }
+
+              if (numeric)
+              {
+                MLPutRealArray(loopback, fdata, dims.data(), NULL, rank + array_rank);
+              }
+              else
+              {
+                put_general_array(loopback, fdata, dims.data(), rank + array_rank);
+              }
+
+              delete [] fdata;
+            }
+            else if (superSize == 4)
+            {
+              float *fdata = 0;
+              try
+              {
+                fdata = new float[nElems*nArrayElems];
+              }
+              catch(bad_alloc e)
+              {
+                throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+              }
+              if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+              {
+                delete [] fdata;
+                throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+              }
+
+              MLPutReal32Array(loopback, fdata, dims2.data(), NULL, rank + array_rank);
+              delete [] fdata;
+            }
+            else
+            {
+              assert(0);
+            }
           }
           break;
         default:

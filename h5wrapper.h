@@ -86,8 +86,11 @@ public:
 
   size_t getSize() const;
   hid_t  getNativeId() const;
+  hid_t  getSuperId() const;
+  size_t getSuperSize() const;
 private:
   hid_t native_id;
+  hid_t super_id;
 };
 
 
