@@ -45,6 +45,9 @@ endif
 
 INCLUDES = -I${MLINKDIR} -I${HDF5DIR}/include
 CFLAGS   = -Wall -Wno-write-strings -O3
+ifeq ($(UNAME), Darwin)
+	CFLAGS += -mmacosx-version-min=10.6
+endif
 MPREP = ${MLINKDIR}/mprep
 MCC   = ${MLINKDIR}/mcc
 
