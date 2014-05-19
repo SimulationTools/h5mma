@@ -202,7 +202,7 @@ void ReadDatasets(const char *fileName)
       H5T_class_t typeclass = H5Tget_class(datatype.getId());
       size_t size = datatype.getSize();
 
-      H5T_class_t superclass = H5Tget_class(datatype.getSuperId());
+      H5T_class_t superclass = typeclass == H5T_ARRAY ? H5Tget_class(datatype.getSuperId()) : H5T_NO_CLASS;
       size_t superSize = datatype.getSuperSize();
 
       /* Only accept 4 byte integers, 8 byte floats or 1 byte integers (as characters) */

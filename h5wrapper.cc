@@ -120,7 +120,10 @@ H5T::H5T(const H5D& ds)
   if( native_id<0 )
     throw H5Exception("H5Tget_native_type failed");
 
-  super_id = H5Tget_super(id);
+  if (H5Tget_class(id) == H5T_ARRAY)
+    super_id = H5Tget_super(id);
+  else
+    super_id = H5T_NO_CLASS;
 }
 
 H5T::H5T(const H5A& attr)
@@ -149,7 +152,10 @@ size_t H5T::getSize() const
 
 size_t H5T::getSuperSize() const
 {
-  return H5Tget_size(super_id);
+  if(super_id == H5T_NO_CLASS)
+    return -1;
+  else
+    return H5Tget_size(super_id);
 }
 
 hid_t H5T::getNativeId() const
