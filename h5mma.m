@@ -116,6 +116,9 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
       "Datasets"|{"Datasets"},
       If[turbo, ReadDatasetNamesFast[absfile], ReadDatasetNames[absfile]],
 
+      {"Datasets", {_String, __Span}},
+      ImportHDF5[absfile, {"Datasets", {elements[[2]]}}][[1]],
+
       {"Datasets", {{_String, __Span}..}},
       datasets = elements[[2, All, 1]];
       slabs = elements[[2, All, 2;;]];
