@@ -90,6 +90,52 @@ long GetDatasetNames(vector<string> *datasetNames)
   return n;
 }
 
+/* Get the list of requested dataset slabs from Mathematica */
+long GetDatasetSlabs(vector<vector<vector<int> > > &datasetSlabs)
+{
+  long l, m, n;
+  if(MLCheckFunction(stdlink, "List", &l)!=MLSUCCESS)
+  {
+    fail(FAIL_INVALID, NULL);
+    return -1;
+  }
+
+  datasetSlabs.resize(l);
+
+  for(int i=0; i<l; i++)
+  {
+    if(MLCheckFunction(stdlink, "List", &m)!=MLSUCCESS)
+    {
+      fail(FAIL_INVALID, NULL);
+      return -1;
+    }
+    datasetSlabs[i].resize(m);
+
+    for(int j=0; j<m; j++)
+    {
+      if(MLCheckFunction(stdlink, "Span", &n)!=MLSUCCESS || n != 3)
+      {
+        fail(FAIL_INVALID, NULL);
+        return -1;
+      }
+
+      for(int k=0; k<n; k++)
+      {
+        int s;
+        if(MLGetInteger(stdlink, &s))
+        {
+          datasetSlabs[i][j].push_back(s);
+        } else {
+          fail(FAIL_ML, NULL);
+          return -1;
+        }
+      }
+    }
+  }
+
+  return l;
+}
+
 /* Read dimensions of a given list of datasets in a file */
 void ReadDatasetDimensions(const char *fileName)
 {
@@ -168,6 +214,12 @@ void ReadDatasets(const char *fileName)
   if(n<0)
     return;
 
+  /* Get the list of dataset hyperslabs to be read from Mathematica */
+  vector<vector<vector<int> > > datasetSlabs;
+  long ns = GetDatasetSlabs(datasetSlabs);
+  if(ns != n)
+    return;
+
   /* Create a loopback link to store the list until we are sure it can be fully
      filled. This way if something fails we can abort and send $Failed back. */
   MLINK loopback;
@@ -242,7 +294,27 @@ void ReadDatasets(const char *fileName)
         H5S dataspace(dataset);
         const int rank = dataspace.getSimpleExtentNDims();
         vector<hsize_t> dims_out(rank);
-        dataspace.getSimpleExtentDims(dims_out.data());
+
+        if(datasetSlabs[i].size() > 0)
+        {
+          if(datasetSlabs[i].size() != rank)
+            fail(FAIL_INVALID, NULL);
+          vector<hsize_t> offsets(rank);
+          vector<hsize_t> strides(rank);
+          vector<hsize_t> lengths(rank);
+          for (int j=0; j<rank; j++)
+          {
+            offsets[j] = datasetSlabs[i][j][0] - 1;
+            strides[j] = datasetSlabs[i][j][2];
+            lengths[j] = ceil(((double)(datasetSlabs[i][j][1] - offsets[j])) / ((double)strides[j]));
+            dims_out[j] = lengths[j];
+          }
+
+          H5Sselect_hyperslab(dataspace.getId(), H5S_SELECT_SET, offsets.data(),
+                              strides.data(), lengths.data(), NULL);
+        } else {
+          dataspace.getSimpleExtentDims(dims_out.data());
+        }
 
         /* Read data */
         int nElems = 1;
@@ -259,23 +331,25 @@ void ReadDatasets(const char *fileName)
           dims2[j] = dims_out[j];
         }
 
+        hid_t memspace = H5Screate_simple(rank, dims_out.data(), NULL); 
+
         switch(typeclass)
         {
         case H5T_INTEGER:
           if(size == 4)
           {
             vector<int> idata(nElems);
-            if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, idata.data()) < 0)
+            if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, idata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
             MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
           } else if(size==2) {
             vector<short> sdata(nElems);
-            if (H5Dread(dataset.getId(), H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, sdata.data()) < 0)
+            if (H5Dread(dataset.getId(), H5T_NATIVE_SHORT, memspace, dataspace.getId(), H5P_DEFAULT, sdata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
             MLPutInteger16Array(loopback, sdata.data(), dims2.data(), 0, rank);
           } else if(size==1) {
             vector<char> cdata(nElems);
-            if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, cdata.data()) < 0)
+            if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, cdata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
             MLPutString(loopback, cdata.data());
           }
@@ -292,7 +366,7 @@ void ReadDatasets(const char *fileName)
             {
               throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
             }
-            if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+            if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, fdata) < 0)
             {
               delete [] fdata;
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
@@ -326,7 +400,7 @@ void ReadDatasets(const char *fileName)
             {
               throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
             }
-            if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+            if (H5Dread(dataset.getId(), datatype.getId(), memspace, dataspace.getId(), H5P_DEFAULT, fdata) < 0)
             {
               delete [] fdata;
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
@@ -373,7 +447,7 @@ void ReadDatasets(const char *fileName)
               {
                 throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
               }
-              if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+              if (H5Dread(dataset.getId(), datatype.getId(), memspace, dataspace.getId(), H5P_DEFAULT, fdata) < 0)
               {
                 delete [] fdata;
                 throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
@@ -407,7 +481,7 @@ void ReadDatasets(const char *fileName)
               {
                 throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
               }
-              if (H5Dread(dataset.getId(), datatype.getId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, fdata) < 0)
+              if (H5Dread(dataset.getId(), datatype.getId(), memspace, dataspace.getId(), H5P_DEFAULT, fdata) < 0)
               {
                 delete [] fdata;
                 throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));

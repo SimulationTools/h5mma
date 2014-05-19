@@ -5,8 +5,8 @@
 
 :Begin: 
 :Function:       ReadDatasets
-:Pattern:        ReadDatasets[fileName_String, datasets:{__String}]
-:Arguments:      { fileName, datasets }
+:Pattern:        ReadDatasets[fileName_String, datasets:{__String}, slabs:{{___Span}..}]
+:Arguments:      { fileName, datasets, slabs }
 :ArgumentTypes:  { String, Manual }
 :ReturnType:     Manual
 :End:

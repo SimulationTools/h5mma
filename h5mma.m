@@ -57,7 +57,7 @@ Module[{installed},
 Options[ImportHDF5] = {Turbo->False};
 
 ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] := 
-  Module[{absfile, datasets, annotations, data, dims, turbo},
+  Module[{absfile, slabs, datasets, annotations, data, dims, turbo},
     Which[
      FileExistsQ[file],
       absfile = AbsoluteFileName[file],
@@ -76,12 +76,23 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
       "Datasets"|{"Datasets"},
       If[turbo, ReadDatasetNamesFast[absfile], ReadDatasetNames[absfile]],
 
-      {"Datasets", _List},
-      ReadDatasets[absfile, elements[[2]]],
+      {"Datasets", {{_String, __Span}..}},
+      slabs = elements[[2, All, 2;;]];
+      If[!MatchQ[slabs, {{Span[_Integer?Positive, _Integer?Positive, _Integer?Positive] ..} ..}],
+        Throw["Invalid hyperslab specification"];
+      ];
+      datasets = elements[[2, All, 1]];
+      ReadDatasets[absfile, datasets, slabs],
+
+      {"Datasets", {__String}},
+      datasets = elements[[2]];
+      slabs = ConstantArray[{}, Length[datasets]];
+      ReadDatasets[absfile, datasets, slabs],
 
       "Data"|{"Data"},
       datasets = ImportHDF5[absfile];
-      ReadDatasets[absfile, datasets],
+      slabs = ConstantArray[{}, Length[dsNames]];
+      ReadDatasets[absfile, datasets, slabs],
 
       {"Dimensions", _List},
       ReadDatasetDimensions[absfile, elements[[2]]],
