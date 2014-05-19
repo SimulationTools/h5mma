@@ -338,17 +338,26 @@ void ReadDatasets(const char *fileName)
             vector<mlint64> idata(nElems);
             if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, idata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-            MLPutInteger64Array(loopback, idata.data(), dims2.data(), 0, rank);
+            if (rank == 0)
+              MLPutInteger64(loopback, idata[0]);
+            else
+              MLPutInteger64Array(loopback, idata.data(), dims2.data(), 0, rank);
           } else if(size == 4) {
             vector<int> idata(nElems);
             if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, idata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-            MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
+            if (rank == 0)
+              MLPutInteger(loopback, idata[0]);
+            else
+              MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
           } else if(size==2) {
             vector<short> sdata(nElems);
             if (H5Dread(dataset.getId(), H5T_NATIVE_SHORT, memspace, dataspace.getId(), H5P_DEFAULT, sdata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
-            MLPutInteger16Array(loopback, sdata.data(), dims2.data(), 0, rank);
+            if (rank == 0)
+              MLPutInteger16(loopback, sdata[0]);
+            else
+              MLPutInteger16Array(loopback, sdata.data(), dims2.data(), 0, rank);
           } else if(size==1) {
             vector<char> cdata(nElems);
             if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, cdata.data()) < 0)
@@ -382,7 +391,10 @@ void ReadDatasets(const char *fileName)
 
             if (numeric)
             {
-              MLPutRealArray(loopback, fdata, dims.data(), NULL, rank);
+              if (rank == 0)
+                MLPutReal(loopback, fdata[0]);
+              else
+                MLPutRealArray(loopback, fdata, dims.data(), NULL, rank);
             }
             else
             {
@@ -408,7 +420,10 @@ void ReadDatasets(const char *fileName)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
             }
 
-            MLPutReal32Array(loopback, fdata, dims2.data(), NULL, rank);
+            if (rank == 0)
+              MLPutReal32(loopback, fdata[0]);
+            else
+              MLPutReal32Array(loopback, fdata, dims2.data(), NULL, rank);
             delete [] fdata;
           }
           else
@@ -719,8 +734,29 @@ static int put_general_array(MLINK link, const double *fdata, long int dims[], i
     npoints *= dims[i];
   }
 
-  if (rank == 1)
-  {
+  if (rank == 0) {
+    if (isfinite(fdata[0]))
+    {
+      MLPutReal(link, fdata[0]);
+    }
+    else if (isnan(fdata[0]))
+    {
+      MLPutSymbol(link, "Indeterminate");
+    }
+    else if (isinf(fdata[0]))
+    {
+      MLPutFunction(link, "DirectedInfinity", 1);
+      if(fdata[0]==std::numeric_limits<double>::infinity())
+        MLPutInteger(link, 1);
+      else
+        MLPutInteger(link, -1);
+    }
+    else
+    {
+      // Not sure what to do here.  Can this happen?
+      MLPutSymbol(link, "Unknown");
+    }
+  } else if (rank == 1) {
     MLPutFunction(link, "List", dims[0]);
     for (int i = 0; i < dims[0]; i++)
     {
