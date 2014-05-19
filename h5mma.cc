@@ -257,12 +257,9 @@ void ReadDatasets(const char *fileName)
       H5T_class_t superclass = typeclass == H5T_ARRAY ? H5Tget_class(datatype.getSuperId()) : H5T_NO_CLASS;
       size_t superSize = datatype.getSuperSize();
 
-      /* Only accept 4 byte integers, 8 byte floats or 1 byte integers (as characters) */
-      if (!((typeclass == H5T_INTEGER && size == 4) ||
-            (typeclass == H5T_INTEGER && size == 2) ||
-            (typeclass == H5T_FLOAT && size == 8) ||
-            (typeclass == H5T_FLOAT && size == 4) ||
-            (typeclass == H5T_INTEGER && size == 1) ||
+      /* Only accept a limited supset of the HDF5 data types */
+      if (!((typeclass == H5T_INTEGER && (size == 8 || size == 4 || size == 2 || size == 1)) ||
+            (typeclass == H5T_FLOAT && (size == 8 || size == 4)) ||
             (typeclass == H5T_STRING) ||
             (typeclass == H5T_ARRAY && superclass == H5T_FLOAT && (size == 4 || size == 8))))
       {
@@ -336,8 +333,13 @@ void ReadDatasets(const char *fileName)
         switch(typeclass)
         {
         case H5T_INTEGER:
-          if(size == 4)
+          if(size == 8)
           {
+            vector<mlint64> idata(nElems);
+            if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, idata.data()) < 0)
+              throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+            MLPutInteger64Array(loopback, idata.data(), dims2.data(), 0, rank);
+          } else if(size == 4) {
             vector<int> idata(nElems);
             if (H5Dread(dataset.getId(), datatype.getNativeId(), memspace, dataspace.getId(), H5P_DEFAULT, idata.data()) < 0)
               throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
