@@ -54,6 +54,46 @@ Module[{installed},
   ];
 ];
 
+makeSlabExplicit[Span[i_, j_], max_Integer] := 
+ makeSlabExplicit[Span[i, j, 1], max];
+
+makeSlabExplicit[Span[i_, All, k_], max_Integer] := 
+ makeSlabExplicit[Span[i, max, k], max];
+
+makeSlabExplicit[Span[All, j_, k_], max_Integer] := 
+ makeSlabExplicit[Span[max, j, k], max];
+
+makeSlabExplicit[Span[i_?Negative, j_, k_], max_Integer] := 
+ makeSlabExplicit[Span[max + i + 1, j, k], max];
+
+makeSlabExplicit[Span[i_, j_?Negative, k_], max_Integer] := 
+ makeSlabExplicit[Span[i, max + j + 1, k], max];
+
+makeSlabExplicit[Span[i_?Positive, j_?Positive, k_], max_Integer] /; i > max || j > max || i > j:=
+ Throw["Invalid hyperslab specification"];
+
+makeSlabExplicit[Span[i_, j_, k_?Negative], max_Integer]:=
+ Throw["Invalid hyperslab specification"];
+
+makeSlabExplicit[Span[i_Integer?Positive, j_Integer?Positive, k_Integer?Positive], max_Integer] /; i<=j && i<=max && j<=max := Span[i, j, k];
+
+makeSlabsExplicit[slabs : {__Span}, dims : {__Integer}] /; Length[slabs] != Length[dims] := 
+ makeSlabsExplicit[PadRight[slabs, Length[dims], 1 ;; All], dims];
+
+makeSlabsExplicit[slabs : {__Span}, dims : {__Integer}] := 
+ MapThread[makeSlabExplicit, {slabs, dims}];
+
+makeSlabsExplicit[file_String, datasets : {__String}, slabs : {{__Span} ..}] := 
+ Module[{explicitSlabs, dims},
+  dims = ReadDatasetDimensions[file, datasets];
+  explicitSlabs = MapThread[makeSlabsExplicit, {slabs, dims}];
+
+  If[!MatchQ[explicitSlabs, {{Span[_Integer?Positive, _Integer?Positive, _Integer] ..} ..}], 
+    Throw["Invalid hyperslab specification"];
+  ];
+  explicitSlabs
+];
+
 Options[ImportHDF5] = {Turbo->False};
 
 ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] := 
@@ -77,11 +117,9 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
       If[turbo, ReadDatasetNamesFast[absfile], ReadDatasetNames[absfile]],
 
       {"Datasets", {{_String, __Span}..}},
-      slabs = elements[[2, All, 2;;]];
-      If[!MatchQ[slabs, {{Span[_Integer?Positive, _Integer?Positive, _Integer?Positive] ..} ..}],
-        Throw["Invalid hyperslab specification"];
-      ];
       datasets = elements[[2, All, 1]];
+      slabs = elements[[2, All, 2;;]];
+      slabs = makeSlabsExplicit[absfile, datasets, slabs];
       ReadDatasets[absfile, datasets, slabs],
 
       {"Datasets", {__String}},
