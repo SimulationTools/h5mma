@@ -106,3 +106,105 @@ Test[
     ,
     TestID->"ImportHDF5 - short int"
 ]
+
+(****************************************************************)
+(* ImportHDF5 - hyperslab interface                             *)
+(****************************************************************)
+
+slab[s__] := ImportHDF5[testH5, {"Datasets", {"Test Data", s}}];
+
+Test[
+    slab[1 ;; All ;; 3]
+    ,
+    data[[1 ;; All ;; 3]]
+    ,
+    TestID -> "Hyperslab1"
+]
+
+Test[
+    slab[1 ;; -1 ;; 3]
+    ,
+    data[[1 ;; -1 ;; 3]]
+    ,
+    TestID -> "Hyperslab2"
+]
+
+Test[
+    slab[1 ;; 7 ;; 3]
+    ,
+    data[[1 ;; 7 ;; 3]]
+    ,
+    TestID -> "Hyperslab3"
+]
+
+Test[
+    slab[1 ;; -7 ;; 3]
+    ,
+    data[[1 ;; -7 ;; 3]]
+    ,
+    TestID -> "Hyperslab4"
+]
+
+Test[
+    slab[1 ;; -7 ;; 3, 2 ;; 4 ;; 1]
+    ,
+    data[[1 ;; -7 ;; 3, 2 ;; 4 ;; 1]]
+    ,
+    TestID -> "Hyperslab5"
+]
+
+Test[
+    slab[-7 ;; -1 ;; 3, 2 ;; 4 ;; 1]
+    ,
+    data[[-7 ;; -1 ;; 3, 2 ;; 4 ;; 1]]
+    ,
+    TestID -> "Hyperslab6"
+]
+
+Test[
+    slab[-1 ;; -1 ;; 3, 2 ;; 4 ;; 1]
+    ,
+    data[[-1 ;; -1 ;; 3, 2 ;; 4 ;; 1]]
+    ,
+    TestID -> "Hyperslab7"
+]
+
+Test[
+    slab[1 ;; 1 ;; 3, 2 ;; 4 ;; 1]
+    ,
+    data[[1 ;; 1 ;; 1, 2 ;; 4 ;; 1]]
+    ,
+    TestID -> "Hyperslab8"
+]
+
+Test[
+    Catch[slab[-1 ;; 1 ;; 3, 2 ;; 4 ;; 1]]
+    ,
+    "Invalid hyperslab specification"
+    ,
+    TestID -> "Hyperslab9"
+]
+
+Test[
+    Catch[slab[3 ;; 1 ;; 3, 2 ;; 4 ;; 1]]
+    ,
+    "Invalid hyperslab specification"
+    ,
+    TestID -> "Hyperslab10"
+]
+
+Test[
+    Catch[slab[1 ;; 7 ;; -3, 2 ;; 4 ;; 1]]
+    ,
+    "Invalid hyperslab specification"
+    ,
+    TestID -> "Hyperslab11"
+]
+
+Test[
+    ImportHDF5[testH5, {"Datasets", {{"Test Data", 1 ;; -2 ;; 3}}}][[1]]
+    ,
+    data[[1 ;; -2 ;; 3]]
+    ,
+    TestID -> "Hyperslab"
+]
