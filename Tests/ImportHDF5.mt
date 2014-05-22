@@ -115,7 +115,8 @@ Test[
 Test[
     ImportHDF5[compoundH5, {"Datasets", "compound dataset"}]
     ,
-    {"Integer data" -> {1, 2, 3}, "Float data" -> {43.21, 43.22, 43.23}, 
+    {"Integer data" -> {1, 2, 3},
+     "Float data" -> {43.209999084472656, 43.220001220703125, 43.22999954223633},
      "Double data" -> {12.31, 12.32, 12.33}}
     ,
     TestID->"ImportHDF5 - compound"
