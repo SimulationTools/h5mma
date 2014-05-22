@@ -132,7 +132,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
 
       "Data"|{"Data"},
       datasets = ImportHDF5[absfile];
-      slabs = ConstantArray[{}, Length[dsNames]];
+      slabs = ConstantArray[{}, Length[datasets]];
       ReadDatasets[absfile, datasets, slabs],
 
       {"Dimensions", _List},
