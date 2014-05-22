@@ -261,7 +261,8 @@ void ReadDatasets(const char *fileName)
       if (!((typeclass == H5T_INTEGER && (size == 8 || size == 4 || size == 2 || size == 1)) ||
             (typeclass == H5T_FLOAT && (size == 8 || size == 4)) ||
             (typeclass == H5T_STRING) ||
-            (typeclass == H5T_ARRAY && superclass == H5T_FLOAT && (size == 4 || size == 8))))
+            (typeclass == H5T_ARRAY && superclass == H5T_FLOAT && (size == 4 || size == 8)) ||
+            (typeclass == H5T_COMPOUND)))
       {
         stringstream ss;
         ss << "Unsupported datatype: ";
@@ -282,9 +283,7 @@ void ReadDatasets(const char *fileName)
         if (H5Dread(dataset.getId(), datatype.getNativeId(), H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)str.data()) < 0)
             throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
         MLPutString(loopback, str.data());
-      }
-      else
-      {
+      } else {
         /* Numeric data */
 
         /* Get dimensions of this dataset */
@@ -513,6 +512,160 @@ void ReadDatasets(const char *fileName)
             }
           }
           break;
+
+        case H5T_COMPOUND:
+          {
+            /* Get information about compound dataset members */
+            int nmembers = H5Tget_nmembers(datatype.getId());
+            vector<H5T_class_t> memberClasses(nmembers);
+            vector<string> memberNames(nmembers);
+            vector<hid_t> memberTypes(nmembers);
+            vector<size_t> memberSizes(nmembers);
+
+            for (int j=0; j<nmembers; j++)
+            {
+              memberClasses[j] = H5Tget_member_class(datatype.getId(), j);
+              char * memberName = H5Tget_member_name(datatype.getId(), j);
+              memberNames[j] = string(memberName);
+              free(memberName);
+
+              hid_t type = H5Tget_member_type(datatype.getId(), j);
+              memberSizes[j] = H5Tget_size(type);
+              memberTypes[j] = H5Tcreate(H5T_COMPOUND, memberSizes[j]);
+              H5Tinsert(memberTypes[j], memberNames[j].data(), 0, type);
+              H5Tclose(type);
+
+              if (!((memberClasses[j] == H5T_INTEGER && (memberSizes[j] == 8 || memberSizes[j] == 4 || memberSizes[j] == 2 || memberSizes[j] == 1)) ||
+                    (memberClasses[j] == H5T_FLOAT && (memberSizes[j] == 8 || memberSizes[j] == 4))))
+              {
+                stringstream ss;
+                ss << "Unsupported datatype in compound datatype: "
+                   << "class " << memberClasses[j] << ", size " << memberSizes[j];
+                string str = ss.str();
+                throw(H5Exception(str));
+              }
+            }
+
+            MLPutFunction(loopback, "List", nmembers);
+            for (int j=0; j<nmembers; j++)
+            {
+              MLPutFunction(loopback, "Rule", 2);
+              MLPutString(loopback, memberNames[j].data());
+
+              /* The following should really be factored out to avoid duplicating it */
+              switch(memberClasses[j])
+              {
+              case H5T_INTEGER:
+                if(memberSizes[j] == 8)
+                {
+                  vector<mlint64> idata(nElems);
+                  if (H5Dread(dataset.getId(), memberTypes[j], memspace, dataspace.getId(), H5P_DEFAULT, idata.data()) < 0)
+                    throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+                  if (rank == 0)
+                    MLPutInteger64(loopback, idata[0]);
+                  else
+                    MLPutInteger64Array(loopback, idata.data(), dims2.data(), 0, rank);
+                } else if(memberSizes[j] == 4) {
+                  vector<int> idata(nElems);
+                  if (H5Dread(dataset.getId(), memberTypes[j], memspace, dataspace.getId(), H5P_DEFAULT, idata.data()) < 0)
+                    throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+                  if (rank == 0)
+                    MLPutInteger(loopback, idata[0]);
+                  else
+                    MLPutIntegerArray(loopback, idata.data(), dims.data(), 0, rank);
+                } else if(memberSizes[j]==2) {
+                  vector<short> sdata(nElems);
+                  if (H5Dread(dataset.getId(), memberTypes[j], memspace, dataspace.getId(), H5P_DEFAULT, sdata.data()) < 0)
+                    throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+                  if (rank == 0)
+                    MLPutInteger16(loopback, sdata[0]);
+                  else
+                    MLPutInteger16Array(loopback, sdata.data(), dims2.data(), 0, rank);
+                } else if(memberSizes[j]==1) {
+                  vector<char> cdata(nElems);
+                  if (H5Dread(dataset.getId(), memberTypes[j], memspace, dataspace.getId(), H5P_DEFAULT, cdata.data()) < 0)
+                    throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+                  MLPutString(loopback, cdata.data());
+                }
+                break;
+              case H5T_FLOAT:
+                if (memberSizes[j] == 8)
+                {
+                  double *fdata = 0;
+                  try
+                  {
+                    fdata = new double[nElems];
+                  }
+                  catch(bad_alloc e)
+                  {
+                    throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+                  }
+                  if (H5Dread(dataset.getId(), memberTypes[j], memspace, dataspace.getId(), H5P_DEFAULT, fdata) < 0)
+                  {
+                    delete [] fdata;
+                    throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+                  }
+
+                  bool numeric = true;
+                  for (int i = 0; i < nElems; i++)
+                  {
+                    numeric &= isfinite(fdata[i]);
+                  }
+
+                  if (numeric)
+                  {
+                    if (rank == 0)
+                      MLPutReal(loopback, fdata[0]);
+                    else
+                      MLPutRealArray(loopback, fdata, dims.data(), NULL, rank);
+                  }
+                  else
+                  {
+                    put_general_array(loopback, fdata, dims.data(), rank);
+                  }
+
+                  delete [] fdata;
+                }
+                else if (memberSizes[j] == 4)
+                {
+                  float *fdata = 0;
+                  try
+                  {
+                    fdata = new float[nElems];
+                  }
+                  catch(bad_alloc e)
+                  {
+                    throw(H5Exception("Failed to allocate memory for dataset " + datasetNames[i]));
+                  }
+                  if (H5Dread(dataset.getId(), memberTypes[j], memspace, dataspace.getId(), H5P_DEFAULT, fdata) < 0)
+                  {
+                    delete [] fdata;
+                    throw(H5Exception("Failed to read data for dataset " + datasetNames[i]));
+                  }
+
+                  if (rank == 0)
+                    MLPutReal32(loopback, fdata[0]);
+                  else
+                    MLPutReal32Array(loopback, fdata, dims2.data(), NULL, rank);
+                  delete [] fdata;
+                }
+                else
+                {
+                  assert(0);
+                }
+                break;
+
+              default:
+                throw(H5Exception("Data format not supported"));
+              }
+            }
+
+            /* TODO: make sure this is always run */
+            for (int j=0; j<nmembers; j++)
+              H5Tclose(memberTypes[j]);
+          }
+          break;
+
         default:
           throw(H5Exception("Data format not supported"));
         }
