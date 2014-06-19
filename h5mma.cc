@@ -261,7 +261,7 @@ void ReadDatasets(const char *fileName)
       if (!((typeclass == H5T_INTEGER && (size == 8 || size == 4 || size == 2 || size == 1)) ||
             (typeclass == H5T_FLOAT && (size == 8 || size == 4)) ||
             (typeclass == H5T_STRING) ||
-            (typeclass == H5T_ARRAY && superclass == H5T_FLOAT && (size == 4 || size == 8)) ||
+            (typeclass == H5T_ARRAY && superclass == H5T_FLOAT && (superSize == 4 || superSize == 8)) ||
             (typeclass == H5T_COMPOUND)))
       {
         stringstream ss;
