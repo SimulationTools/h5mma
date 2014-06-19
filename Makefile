@@ -42,13 +42,11 @@ ifeq ($(UNAME), Darwin)
   ifneq ($(wildcard /usr/local/lib/libhdf5.dylib),)
     # Homebrew
     HDF5DIR    ?= /usr/local
-    ZLIBDIR    ?= /usr/local/opt/zlib
   endif
   endif
   endif
 endif
 endif
-ZLIBDIR ?= $(HDF5DIR)
 
 INCLUDES = -I${MLINKDIR} -I${HDF5DIR}/include
 CFLAGS   = -Wall -Wno-write-strings -O3
@@ -72,7 +70,7 @@ h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mma.cc
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
 ifeq ($(UNAME), Darwin)
-	@$(CXX) h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi3.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a $(ZLIBDIR)/lib/libz.a -framework CoreFoundation -framework Foundation -o $(EXEDIR)/h5mma -mmacosx-version-min=10.6
+	@$(CXX) h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi3.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a -lz -framework CoreFoundation -framework Foundation -o $(EXEDIR)/h5mma -mmacosx-version-min=10.6
 else
 ifeq ($(UNAME), Linux)
 	@$(CXX) -static -pthread h5mma.o h5mmatm.o h5wrapper.o -L${HDF5DIR}/lib -lhdf5 $(MATHLIBS) -lz -ldl -o $(EXEDIR)/h5mma
