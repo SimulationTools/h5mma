@@ -3,6 +3,7 @@ Print[$Version];
 testH5 = FileNameJoin[{$h5mmaInstallationDirectory, "h5mma", "Tests", "test.h5"}];
 shortintH5 = FileNameJoin[{$h5mmaInstallationDirectory, "h5mma", "Tests", "shortint.h5"}];
 compoundH5 = FileNameJoin[{$h5mmaInstallationDirectory, "h5mma", "Tests", "compound.h5"}];
+arrayH5 = FileNameJoin[{$h5mmaInstallationDirectory, "h5mma", "Tests", "array.h5"}];
 data = Partition[Range[1., 2000.], 10];
 
 If[!FileExistsQ[testH5], Print["Cannot find test HDF5 file "<>ToString[testH5]]; Abort[]];
@@ -106,6 +107,18 @@ Test[
       5, 6}, {0, 2, 4, 6, 8, 10, 12}}
     ,
     TestID->"ImportHDF5 - short int"
+]
+
+(****************************************************************)
+(* ImportHDF5 - array                                           *)
+(****************************************************************)
+
+Test[
+    ImportHDF5[arrayH5, {"Datasets", "array dataset"}]
+    ,
+    ArrayReshape[N[Range[3*4*5*6] - 1], {3, 4, 5, 6}]
+    ,
+    TestID->"ImportHDF5 - array"
 ]
 
 (****************************************************************)
