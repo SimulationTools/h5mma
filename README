@@ -1,8 +1,8 @@
 ===============================================================================
  h5mma
 ===============================================================================
- Version 1.1.0
- Copyright 2011-2013 Barry Wardell and Ian Hinder
+ Version 1.2.0
+ Copyright 2011-2014 Barry Wardell and Ian Hinder
 
 The h5mma package provides improved support for reading HDF5 files in
 Mathematica. It is significantly faster, more memory efficient and crash
