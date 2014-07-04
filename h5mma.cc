@@ -528,7 +528,7 @@ void ReadDatasets(const char *fileName)
               memberClasses[j] = H5Tget_member_class(datatype.getId(), j);
               char * memberName = H5Tget_member_name(datatype.getId(), j);
               memberNames[j] = string(memberName);
-              free(memberName);
+              H5free_memory(memberName);
 
               hid_t type = H5Tget_member_type(datatype.getId(), j);
               memberSizes[j] = H5Tget_size(type);
