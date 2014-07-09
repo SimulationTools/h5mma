@@ -83,13 +83,13 @@ h5mmatm.cc : h5mma.tm
 
 tarball: ${PKGFILES}
 	mkdir h5mma
-	cp -a --parents ${PKGFILES} h5mma/
+	rsync -aR ${PKGFILES} h5mma/
 	tar -czf h5mma.tar.gz h5mma
 	rm -rf h5mma
 
 zip: ${PKGFILES}
 	mkdir h5mma
-	cp -a --parents ${PKGFILES} h5mma/
+	rsync -aR ${PKGFILES} h5mma/
 	zip -r h5mma.zip h5mma
 	rm -rf h5mma
 
