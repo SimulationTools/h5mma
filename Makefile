@@ -67,7 +67,7 @@ ifeq ($(UNAME), Darwin)
 	@$(CXX) h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi4.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a -lz -framework CoreFoundation -framework Foundation -o $(EXEDIR)/h5mma -mmacosx-version-min=10.6
 else
 ifeq ($(UNAME), Linux)
-	@$(CXX) -static -pthread h5mma.o h5mmatm.o h5wrapper.o -L${HDF5DIR}/lib -lhdf5 $(MATHLIBS) -lz -ldl -o $(EXEDIR)/h5mma
+	@$(CXX) -static -pthread h5mma.o h5mmatm.o h5wrapper.o -L${HDF5DIR}/lib -lhdf5 -L${SZIPDIR}/lib -lsz $(MATHLIBS) -lz -ldl -luuid -o $(EXEDIR)/h5mma
 endif
 endif
 
