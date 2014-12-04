@@ -8,12 +8,6 @@ HOSTNAME := $(shell hostname)
 
 CXX ?= g++
 
-# Damiana specific paths
-ifeq ($(HOSTNAME), login-damiana)
-  MLINKDIR   ?= /cluster/MATHEMATICA/8.0.1/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
-  HDF5DIR    ?= /cluster/hdf5/1.8.7
-endif
-
 ifeq ($(UNAME), Linux)
   # Linux specific paths
   ifeq ($(ARCH), x86_64)
