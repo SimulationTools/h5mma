@@ -18,11 +18,11 @@ ifeq ($(UNAME), Linux)
   # Linux specific paths
   ifeq ($(ARCH), x86_64)
     EXEDIR     = Linux-x86-64
-    MATHLIBS   = -L${MLINKDIR} -lML64i3 -lrt
+    MATHLIBS   = -L${MLINKDIR} -lML64i4 -lrt
   else
   ifeq ($(ARCH), i686)
     EXEDIR     = Linux
-    MATHLIBS   = -L${MLINKDIR} -lML32i3 -lrt
+    MATHLIBS   = -L${MLINKDIR} -lML32i4 -lrt
   endif
   endif
 else
