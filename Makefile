@@ -28,7 +28,7 @@ ifeq ($(UNAME), Linux)
 else
 ifeq ($(UNAME), Darwin)
   # Mac OSX specific paths
-  MLINKDIR   ?= /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions
+  MLINKDIR   ?= /Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/MacOSX-x86-64/CompilerAdditions
   EXEDIR     = MacOSX-x86-64
   MATHLIBS   = -F$(MLINKDIR) -framework mathlink
   ifneq ($(wildcard /opt/local/lib/libhdf5.dylib),)
@@ -70,7 +70,7 @@ h5mma : h5mmatm.cc h5mma.cc h5wrapper.cc h5wrapper.h BUILD_ID
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mma.cc
 	@$(CXX) $(CFLAGS) $(INCLUDES) -c h5mmatm.cc
 ifeq ($(UNAME), Darwin)
-	@$(CXX) h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi3.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a -lz -framework CoreFoundation -framework Foundation -o $(EXEDIR)/h5mma -mmacosx-version-min=10.6
+	@$(CXX) h5mma.o h5mmatm.o h5wrapper.o $(MLINKDIR)/libMLi4.a $(HDF5DIR)/lib/libhdf5.a $(HDF5DIR)/lib/libsz.a -lz -framework CoreFoundation -framework Foundation -o $(EXEDIR)/h5mma -mmacosx-version-min=10.6
 else
 ifeq ($(UNAME), Linux)
 	@$(CXX) -static -pthread h5mma.o h5mmatm.o h5wrapper.o -L${HDF5DIR}/lib -lhdf5 $(MATHLIBS) -lz -ldl -o $(EXEDIR)/h5mma
