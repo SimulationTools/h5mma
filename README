@@ -1,6 +1,6 @@
 #  h5mma
 
-*Version 1.2.0, Copyright 2011-2014 Barry Wardell and Ian Hinder*
+*Version 1.2.1, Copyright 2011-2016 Barry Wardell and Ian Hinder*
 
 The h5mma package provides improved support for reading HDF5 files in
 Mathematica. It is significantly faster, more memory efficient and crash
@@ -8,7 +8,8 @@ resilient than the built-in HDF5 reading support.
 
 ## Getting the package
 
-Binary versions of the h5mma package can be downloaded from the [project webpage](http://bitbucket.org/simulationtools/h5mma).
+Binary versions of the h5mma package can be downloaded from the
+[project webpage](http://bitbucket.org/simulationtools/h5mma).
 
 The source is available from the project git repository:
 
@@ -17,15 +18,21 @@ The source is available from the project git repository:
 
 ## Requirements
 
-  - Mathematica: h5mma requires Mathematica version 6 or newer. It may be possible to get it to work with older versions, but this is not supported.
+  - Mathematica: h5mma requires Mathematica version 6 or newer. It may be possible to get it to
+    work with older versions, but this is not supported.
 
-  - HDF5: A version of the HDF5 library providing the version 1.8 API is required to build from source. The minimum supported version is 1.8.13. Binary versions of the package already include HDF5.
+  - HDF5: A version of the HDF5 library providing the version 1.8 API is required to build from
+    source. The minimum supported version is 1.8.13. Binary versions of the package already include
+    HDF5.
 
 ## Installation
 
-The most straightforward way to install h5mma is using the [binary packages](http://bitbucket.org/simulationtools/h5mma/downloads).
+The most straightforward way to install h5mma is using the
+[binary packages](http://bitbucket.org/simulationtools/h5mma/downloads).
 
-Once you have downloaded a binary package, extract it into the Mathematica Applications directory. To find the correct location of this directory on your system, run the following command in Mathematica:
+Once you have downloaded a binary package, extract it into the Mathematica Applications directory.
+To find the correct location of this directory on your system, run the following command in
+Mathematica:
 
     :::text
     FileNameJoin[{$UserBaseDirectory, "Applications"}]
@@ -45,11 +52,13 @@ For example usage, see the h5mma.nb Mathematica notebook in the doc directory.
 
 ## Compiling
 
-It should normally not be necessary to compile h5mma yourself. If you find you do need to do so, instructions can be found on the [project wiki](http://bitbucket.org/simulationtools/h5mma/wiki).
+It should normally not be necessary to compile h5mma yourself. If you find you do need to do so,
+instructions can be found on the [project wiki](http://bitbucket.org/simulationtools/h5mma/wiki).
 
 ## Known problems
 
-Known bugs are recorded in the project [bug tracker](http://bitbucket.org/simulationtools/h5mma/issues).
+Known bugs are recorded in the project
+[bug tracker](http://bitbucket.org/simulationtools/h5mma/issues).
 
 ## License
 
@@ -74,9 +83,9 @@ library can be found in the file COPYING.HDF5.
   - Barry Wardell
   - Ian Hinder
 
-Max Planck Institute for Gravitational Physics / Albert Einstein Institute  
-Am Muehlenberg 1  
-14476 Potsdam  
-Germany  
+Max Planck Institute for Gravitational Physics / Albert Einstein Institute
+Am Muehlenberg 1
+14476 Potsdam
+Germany
 
 [http://www.aei.mpg.de](http://www.aei.mpg.de)
