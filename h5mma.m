@@ -37,21 +37,23 @@ $h5mmaRemote;
 
 Begin["`Private`"];
 
-Module[{installed},
-  If[ValueQ[$h5mmaRemote],
-    Module[{host, p1, p2},
-      host = $h5mmaRemote[[1]];
-      {p1, p2} = ToString /@ $h5mmaRemote[[2]];
-      installed = Install[p1 <> "@" <> host <> "," <> p2 <> "@" <> host, LinkMode -> Connect, LinkProtocol -> "TCPIP"];
-    ]
-  ,
-    installed = TimeConstrained[Install["h5mma"], 10];
-  ];
+(* Close any existing link *)
+If[MemberQ[Links[], link], LinkClose[link]];
 
-  If[installed === $Failed || installed === $Aborted,
-    Print["h5mma has been installed but the MathLink executable cannot be loaded. Please check the README for instructions for filing a bug report."];
-    Abort[];
-  ];
+(* Create a new link to the executable *)
+If[ValueQ[$h5mmaRemote],
+  Module[{host, p1, p2},
+    host = $h5mmaRemote[[1]];
+    {p1, p2} = ToString /@ $h5mmaRemote[[2]];
+    link = Install[p1 <> "@" <> host <> "," <> p2 <> "@" <> host, LinkMode -> Connect, LinkProtocol -> "TCPIP"];
+  ]
+,
+  link = TimeConstrained[Install["h5mma"], 10];
+];
+
+If[link === $Failed || link === $Aborted,
+  Print["h5mma has been installed but the MathLink executable cannot be loaded. Please check the README for instructions for filing a bug report."];
+  Abort[];
 ];
 
 makeSlabExplicit[Span[i_, j_], max_Integer] := 
