@@ -1,0 +1,3 @@
+# Mathematica and HDF5 modules should be loaded before running h5mma
+HDF5DIR    = /cluster/hdf5/1.8.7
+MLINKDIR   = /cluster/MATHEMATICA/8.0.1/SystemFiles/Links/MathLink/DeveloperKit/Linux-x86-64/CompilerAdditions
