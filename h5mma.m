@@ -96,7 +96,7 @@ makeSlabsExplicit[file_String, datasets : {__String}, slabs : {{__Span} ..}] :=
   explicitSlabs
 ];
 
-Options[ImportHDF5] = {Turbo->False};
+Options[ImportHDF5] = {Turbo->False, "AbortOnMessages" -> True};
 
 ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] := 
   Module[{absfile, slabs, datasets, annotations, data, dims, turbo},
@@ -166,7 +166,7 @@ ImportHDF5[file_String, elements_:{"Datasets"}, OptionsPattern[]] :=
       dims = ImportHDF5[absfile, "Dimensions"];
       {"Annotations"->annotations, "Data"->data, "Datasets" ->datasets, "Dimensions"->dims},
 
-      _,
+      If[OptionValue[AbortOnMessages], _, {}],
       $Failed
     ],
 
